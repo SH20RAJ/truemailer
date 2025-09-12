@@ -34,13 +34,13 @@ export function HowItWorks() {
   ];
 
   const apiExample = {
-    request: `GET https://truemailer.vercel.app/api/validate?email=test@temp-mail.org
+    request: `GET https://truemailer.30tools.com/api/validate?email=test@temp-mail.org
 # Using curl
-curl "https://truemailer.vercel.app/api/validate?email=test@temp-mail.org"
+curl "https://truemailer.30tools.com/api/validate?email=test@temp-mail.org"
 # Using wget  
-wget -qO- "https://truemailer.vercel.app/api/validate?email=test@temp-mail.org"
+wget -qO- "https://truemailer.30tools.com/api/validate?email=test@temp-mail.org"
 # Batch validation
-curl -X POST "https://truemailer.vercel.app/api/validate-batch" \\
+curl -X POST "https://truemailer.30tools.com/api/validate-batch" \\
   -H "Content-Type: application/json" \\
   -d '{"emails": ["user@gmail.com", "spam@temp-mail.org", "admin@company.com"]}'`,
     response: `{

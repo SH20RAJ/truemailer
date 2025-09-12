@@ -50,14 +50,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://truemailer.vercel.app'),
+  metadataBase: new URL('https://truemailer.30tools.com'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://truemailer.vercel.app',
+    url: 'https://truemailer.30tools.com',
     title: 'TrueMailer - Professional Email Validation API',
     description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability with 99.9% accuracy.',
     siteName: 'TrueMailer',
@@ -142,7 +142,7 @@ export default function RootLayout({
               "@type": "SoftwareApplication",
               "name": "TrueMailer",
               "description": "Professional email validation API with real-time disposable email detection",
-              "url": "https://truemailer.vercel.app",
+              "url": "https://truemailer.30tools.com",
               "applicationCategory": "DeveloperApplication",
               "operatingSystem": "Web",
               "offers": {

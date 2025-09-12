@@ -14,7 +14,7 @@ export function QuickIntegration() {
       code: `// Single email validation using fetch
 const validateEmail = async (email) => {
   try {
-    const response = await fetch(\`https://truemailer.vercel.app/api/validate?email=\${encodeURIComponent(email)}\`);
+    const response = await fetch(\`https://truemailer.30tools.com/api/validate?email=\${encodeURIComponent(email)}\`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -33,7 +33,7 @@ console.log(\`Risk Level: \${result.risk_level}\`);
 // Batch validation
 const validateBatch = async (emails) => {
   try {
-    const response = await fetch('https://truemailer.vercel.app/api/validate-batch', {
+    const response = await fetch('https://truemailer.30tools.com/api/validate-batch', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ emails })
@@ -63,7 +63,7 @@ import json
 def validate_email(email):
     try:
         response = requests.get(
-            f"https://truemailer.vercel.app/api/validate?email={email}"
+            f"https://truemailer.30tools.com/api/validate?email={email}"
         )
         response.raise_for_status()
         return response.json()
@@ -83,7 +83,7 @@ else:
 def validate_batch(emails):
     try:
         response = requests.post(
-            "https://truemailer.vercel.app/api/validate-batch",
+            "https://truemailer.30tools.com/api/validate-batch",
             json={"emails": emails}
         )
         response.raise_for_status()
@@ -108,7 +108,7 @@ if batch_result and batch_result['success']:
 // No additional installation required for basic cURL
 
 function validateEmail($email) {
-    $url = "https://truemailer.vercel.app/api/validate?email=" . urlencode($email);
+    $url = "https://truemailer.30tools.com/api/validate?email=" . urlencode($email);
     
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);

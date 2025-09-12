@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 interface CodeBlockProps {
@@ -11,6 +11,7 @@ interface CodeBlockProps {
 
 export function CodeBlock({ code, language, filename }: CodeBlockProps) {
     const [copied, setCopied] = useState(false);
+    const [highlightedCode, setHighlightedCode] = useState(code);
 
     const copyToClipboard = async () => {
         try {
@@ -22,44 +23,89 @@ export function CodeBlock({ code, language, filename }: CodeBlockProps) {
         }
     };
 
-    // Simple syntax highlighting for common languages
-    const highlightCode = (code: string, lang: string) => {
+    useEffect(() => {
+        // Enhanced manual highlighting with better patterns
+        setHighlightedCode(highlightCode(code, language));
+    }, [code, language]);
+
+    // Enhanced syntax highlighting with proper escaping
+    const highlightCode = (code: string, lang: string): string => {
+        // First escape HTML entities to prevent conflicts
+        let highlighted = code
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+
         if (lang === 'javascript' || lang === 'js') {
-            return code
-                .replace(/(const|let|var|function|return|if|else|for|while|try|catch|async|await|import|export|from)/g, '<span class="text-purple-400">$1</span>')
-                .replace(/('.*?'|".*?")/g, '<span class="text-green-400">$1</span>')
-                .replace(/(\d+)/g, '<span class="text-blue-400">$1</span>')
-                .replace(/(\/\/.*$)/gm, '<span class="text-gray-500">$1</span>');
+            highlighted = highlighted
+                // Comments first (to avoid conflicts)
+                .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
+                .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>')
+                // Strings (avoiding already highlighted content)
+                .replace(/(?<!<[^>]*)(["'`])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="text-green-400">$&</span>')
+                // Keywords
+                .replace(/\b(const|let|var|function|return|if|else|for|while|try|catch|async|await|import|export|from|class|extends|new|this|super|static|public|private|protected|interface|type|enum|namespace)\b(?![^<]*>)/g, '<span class="text-purple-400 font-semibold">$1</span>')
+                // Numbers
+                .replace(/\b(\d+\.?\d*)\b(?![^<]*>)/g, '<span class="text-blue-400">$1</span>');
         }
-        if (lang === 'python') {
-            return code
-                .replace(/(def|class|import|from|return|if|else|elif|for|while|try|except|async|await|with)/g, '<span class="text-purple-400">$1</span>')
-                .replace(/('.*?'|".*?")/g, '<span class="text-green-400">$1</span>')
-                .replace(/(\d+)/g, '<span class="text-blue-400">$1</span>')
-                .replace(/(#.*$)/gm, '<span class="text-gray-500">$1</span>');
+        else if (lang === 'python') {
+            highlighted = highlighted
+                // Comments first
+                .replace(/(#.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
+                // Strings
+                .replace(/(?<!<[^>]*)(["'])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="text-green-400">$&</span>')
+                .replace(/("""[\s\S]*?"""|'''[\s\S]*?''')/g, '<span class="text-green-400">$1</span>')
+                // Keywords
+                .replace(/\b(def|class|import|from|return|if|else|elif|for|while|try|except|async|await|with|as|in|and|or|not|is|lambda|yield|break|continue|pass|global|nonlocal)\b(?![^<]*>)/g, '<span class="text-purple-400 font-semibold">$1</span>')
+                // Numbers
+                .replace(/\b(\d+\.?\d*)\b(?![^<]*>)/g, '<span class="text-blue-400">$1</span>');
         }
-        if (lang === 'php') {
-            return code
-                .replace(/(<\?php|\?>)/g, '<span class="text-purple-400">$1</span>')
-                .replace(/(function|return|if|else|elseif|for|while|try|catch|class|public|private|protected)/g, '<span class="text-purple-400">$1</span>')
-                .replace(/('.*?'|".*?")/g, '<span class="text-green-400">$1</span>')
-                .replace(/(\d+)/g, '<span class="text-blue-400">$1</span>')
-                .replace(/(\/\/.*$)/gm, '<span class="text-gray-500">$1</span>');
+        else if (lang === 'php') {
+            highlighted = highlighted
+                // Comments first
+                .replace(/(\/\/.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
+                .replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="text-gray-500 italic">$1</span>')
+                // PHP tags
+                .replace(/(&lt;\?php|\?&gt;)/g, '<span class="text-purple-400 font-semibold">$1</span>')
+                // Strings
+                .replace(/(?<!<[^>]*)(["'])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="text-green-400">$&</span>')
+                // Variables
+                .replace(/(\$\w+)(?![^<]*>)/g, '<span class="text-blue-300">$1</span>')
+                // Keywords
+                .replace(/\b(function|return|if|else|elseif|for|while|try|catch|class|public|private|protected|static|final|abstract|interface|extends|implements|namespace|use|require|include|echo|print)\b(?![^<]*>)/g, '<span class="text-purple-400 font-semibold">$1</span>')
+                // Numbers
+                .replace(/\b(\d+\.?\d*)\b(?![^<]*>)/g, '<span class="text-blue-400">$1</span>');
         }
-        if (lang === 'bash' || lang === 'shell') {
-            return code
-                .replace(/(curl|wget|npm|pip|composer|git|GET|POST|PUT|DELETE)/g, '<span class="text-purple-400">$1</span>')
-                .replace(/('.*?'|".*?")/g, '<span class="text-green-400">$1</span>')
-                .replace(/(#.*$)/gm, '<span class="text-gray-500">$1</span>');
+        else if (lang === 'bash' || lang === 'shell') {
+            highlighted = highlighted
+                // Comments first
+                .replace(/(#.*$)/gm, '<span class="text-gray-500 italic">$1</span>')
+                // Strings
+                .replace(/(?<!<[^>]*)(["'])(?:(?!\1)[^\\]|\\.)*\1/g, '<span class="text-green-400">$&</span>')
+                // URLs
+                .replace(/(https?:\/\/[^\s]+)(?![^<]*>)/g, '<span class="text-blue-300 underline">$1</span>')
+                // HTTP methods
+                .replace(/\b(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\b(?![^<]*>)/g, '<span class="text-orange-400 font-semibold">$1</span>')
+                // Commands
+                .replace(/\b(curl|wget|npm|pip|composer|git|docker|kubectl|ssh|scp|rsync|grep|awk|sed|find|ls|cd|mkdir|rm|cp|mv|chmod|chown|sudo|su|cat|echo|which|whereis|man|ps|kill|top|htop|df|du|mount|umount|tar|zip|unzip|gzip|gunzip)\b(?![^<]*>)/g, '<span class="text-purple-400 font-semibold">$1</span>')
+                // Flags
+                .replace(/(--?\w+)(?![^<]*>)/g, '<span class="text-blue-400">$1</span>');
         }
-        if (lang === 'json') {
-            return code
-                .replace(/(".*?")\s*:/g, '<span class="text-blue-400">$1</span>:')
-                .replace(/:\s*(".*?")/g, ': <span class="text-green-400">$1</span>')
-                .replace(/:\s*(true|false|null)/g, ': <span class="text-purple-400">$1</span>')
-                .replace(/:\s*(\d+)/g, ': <span class="text-blue-400">$1</span>');
+        else if (lang === 'json') {
+            highlighted = highlighted
+                // String values first
+                .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span class="text-green-400">$1</span>')
+                // Property names
+                .replace(/("[\w-]+")(\s*:)/g, '<span class="text-blue-400 font-semibold">$1</span>$2')
+                // Boolean and null values
+                .replace(/:\s*\b(true|false|null)\b(?![^<]*>)/g, ': <span class="text-purple-400 font-semibold">$1</span>')
+                // Numbers
+                .replace(/:\s*(\d+\.?\d*)(?![^<]*>)/g, ': <span class="text-blue-400">$1</span>')
+                // Brackets and braces
+                .replace(/([{}[\],])/g, '<span class="text-gray-300 font-semibold">$1</span>');
         }
-        return code;
+
+        return highlighted;
     };
 
     return (
@@ -89,9 +135,9 @@ export function CodeBlock({ code, language, filename }: CodeBlockProps) {
                 </Button>
                 <pre className="p-4 overflow-x-auto text-sm">
                     <code
-                        className="text-foreground font-mono"
+                        className="text-foreground font-mono leading-relaxed"
                         dangerouslySetInnerHTML={{
-                            __html: highlightCode(code, language)
+                            __html: highlightedCode
                         }}
                     />
                 </pre>
