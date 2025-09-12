@@ -16,38 +16,14 @@ export async function POST(request: NextRequest) {
 
         console.log('Manual domain list refresh requested');
 
-        // Fetch fresh data from GitHub
-        const [disposableResponse, allowlistResponse] = await Promise.all([
-            fetch('https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/main/disposable_email_blocklist.conf', {
-                headers: { 'User-Agent': 'TrueMailer-API/1.0' }
-            }),
-            fetch('https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/main/allowlist.conf', {
-                headers: { 'User-Agent': 'TrueMailer-API/1.0' }
-            })
+        // Import the domain fetcher utility
+        const { fetchDisposableDomains, fetchAllowlistDomains } = await import('@/lib/domain-fetcher');
+
+        // Fetch fresh data with fallback support
+        const [disposableDomains, allowedDomains] = await Promise.all([
+            fetchDisposableDomains({ timeout: 20000, retries: 3 }),
+            fetchAllowlistDomains({ timeout: 20000, retries: 3 })
         ]);
-
-        if (!disposableResponse.ok || !allowlistResponse.ok) {
-            throw new Error('Failed to fetch domain lists from GitHub');
-        }
-
-        const [disposableText, allowlistText] = await Promise.all([
-            disposableResponse.text(),
-            allowlistResponse.text()
-        ]);
-
-        // Parse disposable domains
-        const disposableDomains = disposableText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line && !line.startsWith('#'))
-            .map(domain => domain.toLowerCase());
-
-        // Parse allowed domains
-        const allowedDomains = allowlistText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line && !line.startsWith('#'))
-            .map(domain => domain.toLowerCase());
 
         const response = {
             success: true,

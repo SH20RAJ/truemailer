@@ -23,17 +23,8 @@ import {
     History
 } from "lucide-react";
 import Link from "next/link";
-import { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: 'Email Validation Playground',
-    description: 'Interactive playground to test email validation API. Validate single emails, batch process multiple addresses, and explore API responses in real-time.',
-    openGraph: {
-        title: 'Email Validation Playground | TrueMailer',
-        description: 'Interactive playground to test email validation API with real-time results and detailed analysis.',
-        images: ['/og-playground.png'],
-    }
-};
+
 
 interface ValidationResult {
     email: string;
@@ -108,7 +99,7 @@ export default function PlaygroundPage() {
 
         try {
             const response = await fetch(`/api/validate?email=${encodeURIComponent(emailToTest)}`);
-            const data = await response.json();
+            const data = await response.json() as ValidationResult;
 
             if (!response.ok) {
                 throw new Error((data as any)?.error || 'Validation failed'); // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -152,10 +143,10 @@ export default function PlaygroundPage() {
                 body: JSON.stringify({ emails })
             });
 
-            const data = await response.json();
+            const data = await response.json() as BatchResult;
 
             if (!response.ok) {
-                throw new Error(data.error || 'Batch validation failed');
+                throw new Error((data as any).error || 'Batch validation failed'); // eslint-disable-line @typescript-eslint/no-explicit-any
             }
 
             setBatchResult(data);

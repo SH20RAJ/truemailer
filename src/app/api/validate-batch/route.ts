@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Import the validation logic from the main validate route
-// We'll create a shared validation function
+import { fetchDisposableDomains, fetchAllowlistDomains } from '@/lib/domain-fetcher';
 
 interface ValidationResult {
     email: string;
@@ -24,65 +22,34 @@ let allowedDomains: Set<string> = new Set();
 let lastFetch = 0;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
-async function fetchDisposableDomains(): Promise<Set<string>> {
-    try {
-        const response = await fetch(
-            'https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/main/disposable_email_blocklist.conf',
-            { headers: { 'User-Agent': 'TrueMailer-API/1.0' } }
-        );
-
-        if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-
-        const text = await response.text();
-        return new Set(
-            text.split('\n')
-                .map(line => line.trim())
-                .filter(line => line && !line.startsWith('#'))
-                .map(domain => domain.toLowerCase())
-        );
-    } catch (error) {
-        console.error('Error fetching disposable domains:', error);
-        return new Set();
-    }
-}
-
-async function fetchAllowedDomains(): Promise<Set<string>> {
-    try {
-        const response = await fetch(
-            'https://raw.githubusercontent.com/disposable-email-domains/disposable-email-domains/main/allowlist.conf',
-            { headers: { 'User-Agent': 'TrueMailer-API/1.0' } }
-        );
-
-        if (!response.ok) throw new Error(`Failed to fetch: ${response.status}`);
-
-        const text = await response.text();
-        return new Set(
-            text.split('\n')
-                .map(line => line.trim())
-                .filter(line => line && !line.startsWith('#'))
-                .map(domain => domain.toLowerCase())
-        );
-    } catch (error) {
-        console.error('Error fetching allowed domains:', error);
-        return new Set();
-    }
-}
-
 async function updateDomainLists(): Promise<void> {
     const now = Date.now();
     if (now - lastFetch < CACHE_DURATION && disposableDomains.size > 0) return;
 
+    console.log('Updating domain lists for batch validation with fallback support...');
+
     try {
-        const [newDisposableDomains, newAllowedDomains] = await Promise.all([
-            fetchDisposableDomains(),
-            fetchAllowedDomains()
+        const [disposableList, allowlistList] = await Promise.all([
+            fetchDisposableDomains({ timeout: 15000, retries: 2 }),
+            fetchAllowlistDomains({ timeout: 15000, retries: 2 })
         ]);
 
-        disposableDomains = newDisposableDomains;
-        allowedDomains = newAllowedDomains;
+        disposableDomains = new Set(disposableList.map(domain => domain.toLowerCase()));
+        allowedDomains = new Set(allowlistList.map(domain => domain.toLowerCase()));
         lastFetch = now;
+
+        console.log(`Batch validation domain lists updated: ${disposableDomains.size} disposable, ${allowedDomains.size} allowed`);
     } catch (error) {
-        console.error('Failed to update domain lists:', error);
+        console.error('Failed to update domain lists for batch validation:', error);
+
+        // If we have no cached data and fetch failed, use minimal fallback
+        if (disposableDomains.size === 0) {
+            console.log('No cached data available for batch validation, using minimal fallback list');
+            disposableDomains = new Set([
+                '10minutemail.com', 'temp-mail.org', 'guerrillamail.com',
+                'mailinator.com', 'throwaway.email', 'tempmail.net'
+            ]);
+        }
     }
 }
 
