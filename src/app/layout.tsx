@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TruMailer - Email Validation API",
+  title: "TrueMailer - Email Validation API",
   description: "A lightweight and fast email validation API to check if an email address is valid, disposable, role-based, or spammy.",
 };
 

@@ -2,7 +2,6 @@ import { Hero } from "@/components/landing/hero";
 import { Features } from "@/components/landing/features";
 import { ApiUsage } from "@/components/landing/api-usage";
 import { TechStack } from "@/components/landing/tech-stack";
-import { Installation } from "@/components/landing/installation";
 import { Footer } from "@/components/landing/footer";
 
 export default function Home() {
@@ -12,7 +11,6 @@ export default function Home() {
       <Features />
       <ApiUsage />
       <TechStack />
-      <Installation />
       <Footer />
     </div>
   );

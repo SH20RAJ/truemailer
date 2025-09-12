@@ -36,7 +36,7 @@ export function ApiUsage() {
         
         <div className="text-center mt-8">
           <Button size="lg" asChild>
-            <Link href="https://github.com/sh20raj/trumailer#-api-usage" target="_blank">
+            <Link href="https://github.com/sh20raj/truemailer#-api-usage" target="_blank">
               View Full Documentation
             </Link>
           </Button>
