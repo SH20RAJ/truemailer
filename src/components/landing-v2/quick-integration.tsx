@@ -1,23 +1,27 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { CodeBlock } from "@/components/ui/code-block";
 
 export function QuickIntegration() {
-  const [activeTab, setActiveTab] = useState("nodejs");
-  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<"nodejs" | "python" | "php">("nodejs");
 
   const codeExamples = {
-    nodejs: `// Install: npm install axios
+    nodejs: {
+      code: `// Using fetch API (built-in)
+const response = await fetch('https://truemailer.vercel.app/api/validate?email=user@example.com');
+const data = await response.json();
+console.log(data);
 
+// Using axios (npm install axios)
 const axios = require('axios');
-
 async function validateEmail(email) {
   try {
     const response = await axios.get(
-      \`https://api.truemailer.com/validate?email=\${email}\`
+      \`https://truemailer.vercel.app/api/validate?email=\${email}\`
     );
     return response.data;
   } catch (error) {
@@ -30,20 +34,23 @@ async function validateEmail(email) {
 validateEmail('user@example.com')
   .then(result => {
     if (result && result.valid) {
-      console.log('Valid email address');
+      console.log('✅ Valid email address');
     } else {
-      console.log('Invalid email address');
+      console.log('❌ Invalid email address');
     }
   });`,
+      filename: 'validate-email.js'
+    },
 
-    python: `# Install: pip install requests
-
+    python: {
+      code: `# Install: pip install requests
 import requests
+import json
 
 def validate_email(email):
     try:
         response = requests.get(
-            f"https://api.truemailer.com/validate?email={email}"
+            f"https://truemailer.vercel.app/api/validate?email={email}"
         )
         response.raise_for_status()
         return response.json()
@@ -54,20 +61,32 @@ def validate_email(email):
 # Usage
 result = validate_email("user@example.com")
 if result and result.get("valid"):
-    print("Valid email address")
+    print("✅ Valid email address")
+    print(json.dumps(result, indent=2))
 else:
-    print("Invalid email address")`,
+    print("❌ Invalid email address")
 
-    php: `<?php
+# Batch validation
+emails = ['user1@example.com', 'spam@temp-mail.org', 'admin@company.com']
+for email in emails:
+    result = validate_email(email)
+    status = "✅ Valid" if result and result.get("valid") else "❌ Invalid"
+    print(f"{email}: {status}")`,
+      filename: 'validate_email.py'
+    },
+
+    php: {
+      code: `<?php
 // No additional installation required for basic cURL
 
 function validateEmail($email) {
-    $url = "https://api.truemailer.com/validate?email=" . urlencode($email);
+    $url = "https://truemailer.vercel.app/api/validate?email=" . urlencode($email);
     
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'TrueMailer-PHP-Client/1.0');
     
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -84,17 +103,22 @@ function validateEmail($email) {
 // Usage
 $result = validateEmail("user@example.com");
 if ($result && $result["valid"]) {
-    echo "Valid email address";
+    echo "✅ Valid email address\\n";
+    echo json_encode($result, JSON_PRETTY_PRINT);
 } else {
-    echo "Invalid email address";
+    echo "❌ Invalid email address\\n";
 }
-?>`
-  };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(codeExamples[activeTab]);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+// Batch validation
+$emails = ['user1@example.com', 'spam@temp-mail.org', 'admin@company.com'];
+foreach ($emails as $email) {
+    $result = validateEmail($email);
+    $status = ($result && $result["valid"]) ? "✅ Valid" : "❌ Invalid";
+    echo "$email: $status\\n";
+}
+?>`,
+      filename: 'validate-email.php'
+    }
   };
 
   return (
@@ -151,20 +175,14 @@ if ($result && $result["valid"]) {
                 >
                   PHP
                 </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyToClipboard}
-                  className="ml-auto border-primary/50 text-primary hover:bg-primary/10"
-                >
-                  {copied ? "Copied!" : "Copy Code"}
-                </Button>
               </div>
             </CardHeader>
             <CardContent>
-              <pre className="bg-muted p-6 rounded-lg overflow-x-auto text-sm">
-                <code>{codeExamples[activeTab]}</code>
-              </pre>
+              <CodeBlock
+                code={codeExamples[activeTab].code}
+                language={activeTab === 'nodejs' ? 'javascript' : activeTab}
+                filename={codeExamples[activeTab].filename}
+              />
             </CardContent>
           </Card>
         </motion.div>
