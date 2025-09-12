@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/landing-v2/navbar";
 import { Hero } from "@/components/landing-v2/hero";
 import { WhyTrueMailer } from "@/components/landing-v2/why-truemailer";
 import { Features } from "@/components/landing-v2/features";
@@ -12,20 +11,17 @@ import { Footer } from "@/components/landing-v2/footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="pt-16"> {/* Add padding for fixed navbar */}
-        <Hero />
-        <WhyTrueMailer />
-        <Features />
-        <HowItWorks />
-        <QuickIntegration />
-        <TechStack />
-        <SuggestEmails />
-        <Community />
-        <FinalCTA />
-        <Footer />
-      </div>
+    <div className="pt-16"> {/* Add padding for fixed navbar */}
+      <Hero />
+      <WhyTrueMailer />
+      <Features />
+      <HowItWorks />
+      <QuickIntegration />
+      <TechStack />
+      <SuggestEmails />
+      <Community />
+      <FinalCTA />
+      <Footer />
     </div>
   );
 }
