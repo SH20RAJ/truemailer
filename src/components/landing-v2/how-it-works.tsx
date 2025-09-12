@@ -34,24 +34,36 @@ export function HowItWorks() {
   ];
 
   const apiExample = {
-    request: `GET https://truemailer.vercel.app/api/validate?email=user@example.com
+    request: `GET https://truemailer.vercel.app/api/validate?email=test@temp-mail.org
 # Using curl
-curl "https://truemailer.vercel.app/api/validate?email=user@example.com"
+curl "https://truemailer.vercel.app/api/validate?email=test@temp-mail.org"
 # Using wget  
-wget -qO- "https://truemailer.vercel.app/api/validate?email=user@example.com"`,
+wget -qO- "https://truemailer.vercel.app/api/validate?email=test@temp-mail.org"
+# Batch validation
+curl -X POST "https://truemailer.vercel.app/api/validate-batch" \\
+  -H "Content-Type: application/json" \\
+  -d '{"emails": ["user@gmail.com", "spam@temp-mail.org", "admin@company.com"]}'`,
     response: `{
-  "email": "user@example.com",
+  "email": "test@temp-mail.org",
+  "domain": "temp-mail.org",
+  "valid": false,
   "valid_syntax": true,
   "mx_found": true,
-  "disposable": false,
+  "disposable": true,
   "role_based": false,
-  "spammy": false,
-  "valid": true,
-  "confidence_score": 0.95,
-  "risk_level": "low",
-  "suggestions": [],
-  "domain": "example.com",
-  "mx_records": true
+  "spammy": true,
+  "allowed_list": false,
+  "confidence_score": 0.1,
+  "risk_level": "high",
+  "suggestions": [
+    "This domain is known for providing temporary/disposable email addresses"
+  ],
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "cache_info": {
+    "disposable_domains_count": 12847,
+    "allowed_domains_count": 156,
+    "last_updated": "2024-01-15T08:00:00.000Z"
+  }
 }`
   };
 

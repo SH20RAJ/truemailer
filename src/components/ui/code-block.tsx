@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface CodeBlockProps {
@@ -11,39 +11,6 @@ interface CodeBlockProps {
 
 export function CodeBlock({ code, language, filename }: CodeBlockProps) {
     const [copied, setCopied] = useState(false);
-    const [highlightedCode, setHighlightedCode] = useState("");
-
-    useEffect(() => {
-        const loadPrismAndHighlight = async () => {
-            try {
-                // Dynamically import Prism to avoid SSR issues
-                const Prism = (await import("prismjs")).default;
-
-                // Load language components
-                if (language === "javascript" || language === "js") {
-                    await import("prismjs/components/prism-javascript");
-                } else if (language === "python") {
-                    await import("prismjs/components/prism-python");
-                } else if (language === "php") {
-                    await import("prismjs/components/prism-php");
-                } else if (language === "bash" || language === "shell") {
-                    await import("prismjs/components/prism-bash");
-                } else if (language === "json") {
-                    await import("prismjs/components/prism-json");
-                }
-
-                const prismLanguage = getPrismLanguage(language);
-                const highlighted = Prism.highlight(code, Prism.languages[prismLanguage] || Prism.languages.text, prismLanguage);
-                setHighlightedCode(highlighted);
-            } catch (error) {
-                console.error("Failed to load Prism:", error);
-                // Fallback to simple highlighting
-                setHighlightedCode(simpleHighlight(code, language));
-            }
-        };
-
-        loadPrismAndHighlight();
-    }, [code, language]);
 
     const copyToClipboard = async () => {
         try {
@@ -55,20 +22,8 @@ export function CodeBlock({ code, language, filename }: CodeBlockProps) {
         }
     };
 
-    // Map language names to Prism language identifiers
-    const getPrismLanguage = (lang: string) => {
-        const langMap: { [key: string]: string } = {
-            'js': 'javascript',
-            'ts': 'typescript',
-            'py': 'python',
-            'shell': 'bash',
-            'sh': 'bash'
-        };
-        return langMap[lang] || lang;
-    };
-
-    // Simple fallback highlighting
-    const simpleHighlight = (code: string, lang: string) => {
+    // Simple syntax highlighting for common languages
+    const highlightCode = (code: string, lang: string) => {
         if (lang === 'javascript' || lang === 'js') {
             return code
                 .replace(/(const|let|var|function|return|if|else|for|while|try|catch|async|await|import|export|from)/g, '<span class="text-purple-400">$1</span>')
@@ -134,9 +89,9 @@ export function CodeBlock({ code, language, filename }: CodeBlockProps) {
                 </Button>
                 <pre className="p-4 overflow-x-auto text-sm">
                     <code
-                        className={`language-${getPrismLanguage(language)} font-mono`}
+                        className="text-foreground font-mono"
                         dangerouslySetInnerHTML={{
-                            __html: highlightedCode || code
+                            __html: highlightCode(code, language)
                         }}
                     />
                 </pre>

@@ -11,34 +11,47 @@ export function QuickIntegration() {
 
   const codeExamples = {
     nodejs: {
-      code: `// Using fetch API (built-in)
-const response = await fetch('https://truemailer.vercel.app/api/validate?email=user@example.com');
-const data = await response.json();
-console.log(data);
-
-// Using axios (npm install axios)
-const axios = require('axios');
-async function validateEmail(email) {
+      code: `// Single email validation using fetch
+const validateEmail = async (email) => {
   try {
-    const response = await axios.get(
-      \`https://truemailer.vercel.app/api/validate?email=\${email}\`
-    );
-    return response.data;
+    const response = await fetch(\`https://truemailer.vercel.app/api/validate?email=\${encodeURIComponent(email)}\`);
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error('Validation failed:', error.message);
+    console.error('Validation failed:', error);
     return null;
   }
-}
+};
 
 // Usage
-validateEmail('user@example.com')
-  .then(result => {
-    if (result && result.valid) {
-      console.log('✅ Valid email address');
-    } else {
-      console.log('❌ Invalid email address');
-    }
-  });`,
+const result = await validateEmail('test@temp-mail.org');
+console.log(\`Email: \${result.email}\`);
+console.log(\`Valid: \${result.valid}\`);
+console.log(\`Disposable: \${result.disposable}\`);
+console.log(\`Risk Level: \${result.risk_level}\`);
+
+// Batch validation
+const validateBatch = async (emails) => {
+  try {
+    const response = await fetch('https://truemailer.vercel.app/api/validate-batch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails })
+    });
+    return await response.json();
+  } catch (error) {
+    console.error('Batch validation failed:', error);
+    return null;
+  }
+};
+
+// Validate multiple emails at once
+const batchResult = await validateBatch([
+  'user@gmail.com', 
+  'spam@temp-mail.org', 
+  'admin@company.com'
+]);
+console.log(\`Valid emails: \${batchResult.summary.valid}/\${batchResult.summary.total}\`);`,
       filename: 'validate-email.js'
     },
 
@@ -66,12 +79,27 @@ if result and result.get("valid"):
 else:
     print("❌ Invalid email address")
 
-# Batch validation
-emails = ['user1@example.com', 'spam@temp-mail.org', 'admin@company.com']
-for email in emails:
-    result = validate_email(email)
-    status = "✅ Valid" if result and result.get("valid") else "❌ Invalid"
-    print(f"{email}: {status}")`,
+# Batch validation function
+def validate_batch(emails):
+    try:
+        response = requests.post(
+            "https://truemailer.vercel.app/api/validate-batch",
+            json={"emails": emails}
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Batch validation failed: {e}")
+        return None
+
+# Validate multiple emails at once
+emails = ['user@gmail.com', 'spam@temp-mail.org', 'admin@company.com']
+batch_result = validate_batch(emails)
+if batch_result and batch_result['success']:
+    print(f"Valid: {batch_result['summary']['valid']}/{batch_result['summary']['total']}")
+    for result in batch_result['results']:
+        status = "✅" if result['valid'] else "❌"
+        print(f"{status} {result['email']} - {result['risk_level'].upper()}")`,
       filename: 'validate_email.py'
     },
 

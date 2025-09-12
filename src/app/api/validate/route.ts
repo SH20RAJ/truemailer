@@ -123,13 +123,13 @@ function isRoleBasedEmail(email: string): boolean {
     );
 }
 
-async function checkMXRecord(domain: string): Promise<boolean> {
+async function checkMXRecord(_domain: string): Promise<boolean> {
     try {
         // In a real implementation, you would use DNS lookup
         // For now, we'll simulate this check
         // You can implement actual DNS lookup using a service or library
         return true; // Placeholder
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -255,7 +255,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { email } = body;
+        const { email } = body as { email: string };
 
         if (!email) {
             return NextResponse.json(
