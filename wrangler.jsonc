@@ -17,18 +17,7 @@
 	},
 	"observability": {
 		"enabled": true
-	},
-	/**
-	 * D1 Database Binding
-	 */
-	"d1_databases": [
-		{
-			"binding": "DB",
-			"database_name": "truemailer-db",
-			"database_id": "60ac43db-bf3a-4691-8bda-8aaac1f30f9b",
-			"migrations_dir": "drizzle"
-		}
-	]
+	}
 	/**
 	 * Smart Placement
 	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

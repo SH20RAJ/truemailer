@@ -1,17 +1,39 @@
-import { drizzle } from 'drizzle-orm/d1';
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
 import { eq } from 'drizzle-orm';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { usersTable, sessionsTable, todosTable, type User, type NewUser, type Todo, type NewTodo } from './schema';
 import * as schema from './schema';
 
-// Initialize Drizzle with D1 binding using Cloudflare context
+// Initialize Turso client and Drizzle
+let client: ReturnType<typeof createClient> | null = null;
+let db: ReturnType<typeof drizzle> | null = null;
+
+function initializeDB() {
+  if (!client) {
+    const url = process.env.TURSO_DATABASE_URL;
+    const authToken = process.env.TURSO_AUTH_TOKEN;
+    
+    if (!url) {
+      throw new Error('TURSO_DATABASE_URL environment variable is required');
+    }
+    
+    client = createClient({
+      url,
+      authToken,
+    });
+    
+    db = drizzle(client, { schema });
+  }
+  
+  return db;
+}
+
+// Get database instance
 export function getDB() {
   try {
-    const { env } = getCloudflareContext();
-    return drizzle(env.DB, { schema });
+    return initializeDB();
   } catch (error) {
-    // Fallback for development or when Cloudflare context is not available
-    console.warn('Cloudflare context not available, database operations will be mocked');
+    console.error('Failed to initialize database:', error);
     return null;
   }
 }
@@ -145,7 +167,7 @@ export class UserService {
       .where(eq(usersTable.id, id))
       .run();
 
-    return result.success;
+    return result.rowsAffected > 0;
   }
 
   // Test database connection
@@ -249,7 +271,7 @@ export class TodoService {
       .where(eq(todosTable.id, id))
       .run();
 
-    return result.success;
+    return result.rowsAffected > 0;
   }
 
   // Test database connection
