@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { validateApiKey, createApiResponse, createApiError } from '@/lib/api-middleware'
-import { AnalyticsService } from '@/lib/db'
+import { AnalyticsService, PersonalListService } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json() as { email?: string }
-    const originalBody = JSON.stringify(body)
+    originalBody = JSON.stringify(body)
     const { email } = body
 
     if (!email) {
@@ -63,16 +63,36 @@ export async function POST(request: NextRequest) {
     const commonDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'icloud.com']
     const hasMxRecords = commonDomains.includes(domain) || !isDisposable
 
+    // Check personal blocklist/whitelist
+    const personalListService = new PersonalListService()
+    const personalValidation = await personalListService.getPersonalValidation(context!.userId, email)
+    
+    // Apply personal validation logic
+    let finalValid = !isDisposable && hasMxRecords
+    let finalReason = isDisposable ? 'Disposable email detected' : 
+                      !hasMxRecords ? 'No MX records found' : 
+                      'Valid email'
+    
+    // Personal whitelist overrides all other validations
+    if (personalValidation.isWhitelisted) {
+      finalValid = true
+      finalReason = 'Whitelisted by user'
+    }
+    // Personal blocklist overrides regular validation (but not whitelist)
+    else if (personalValidation.isBlocked) {
+      finalValid = false
+      finalReason = 'Blocked by user'
+    }
+
     const result = {
       email,
-      valid: !isDisposable && hasMxRecords,
+      valid: finalValid,
       syntax_valid: true,
       disposable: isDisposable,
       role_based: isRoleBased,
       mx_records: hasMxRecords,
-      reason: isDisposable ? 'Disposable email detected' : 
-              !hasMxRecords ? 'No MX records found' : 
-              'Valid email'
+      personal_override: personalValidation.personalOverride,
+      reason: finalReason
     }
 
     // Log usage

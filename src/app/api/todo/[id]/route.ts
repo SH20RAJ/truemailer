@@ -4,10 +4,11 @@ import { TodoService } from '@/lib/db';
 // GET single todo by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idParam } = await params
+    const id = parseInt(idParam);
     
     if (isNaN(id)) {
       return Response.json({
@@ -45,10 +46,11 @@ export async function GET(
 // PUT update todo
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idParam } = await params
+    const id = parseInt(idParam);
     
     if (isNaN(id)) {
       return Response.json({
@@ -97,10 +99,11 @@ export async function PUT(
 // DELETE todo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idParam } = await params
+    const id = parseInt(idParam);
     
     if (isNaN(id)) {
       return Response.json({

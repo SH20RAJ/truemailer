@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     default: 'TrueMailer - Professional Email Validation API',
     template: '%s | TrueMailer'
   },
-  description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability with 99.9% accuracy.',
+  description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability with 99.9% accuracy. Open source, privacy-first, and lightning fast.',
   keywords: [
     'email validation',
     'email verification',
@@ -42,7 +42,15 @@ export const metadata: Metadata = {
     'temporary email detection',
     'email validation service',
     'bulk email validation',
-    'email hygiene'
+    'email hygiene',
+    'API integration',
+    'developer tools',
+    'open source email validation',
+    'privacy-first email validation',
+    'real-time validation',
+    'MX record validation',
+    'syntax validation',
+    'role-based email detection'
   ],
   authors: [{ name: 'TrueMailer Team' }],
   creator: 'TrueMailer',
@@ -61,7 +69,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://truemailer.30tools.com',
     title: 'TrueMailer - Professional Email Validation API',
-    description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability with 99.9% accuracy.',
+    description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability with 99.9% accuracy. Open source and privacy-first.',
     siteName: 'TrueMailer',
     images: [
       {
@@ -81,7 +89,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'TrueMailer - Professional Email Validation API',
-    description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability.',
+    description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability. Open source and privacy-first.',
     images: ['/og-image.png'],
     creator: '@truemailer',
     site: '@truemailer'

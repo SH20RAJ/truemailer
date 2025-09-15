@@ -7,6 +7,8 @@ import {
   todosTable, 
   apiKeysTable, 
   apiUsageTable,
+  personalBlocklistTable,
+  personalWhitelistTable,
   type User, 
   type NewUser, 
   type Todo, 
@@ -14,7 +16,11 @@ import {
   type ApiKey,
   type NewApiKey,
   type ApiUsage,
-  type NewApiUsage
+  type NewApiUsage,
+  type PersonalBlocklist,
+  type NewPersonalBlocklist,
+  type PersonalWhitelist,
+  type NewPersonalWhitelist
 } from './schema';
 import * as schema from './schema';
 
@@ -614,6 +620,184 @@ export class AnalyticsService {
       remainingQuota,
       usagePercentage,
       dailyUsage,
+    };
+  }
+}
+
+// Personal Blocklist and Whitelist Service
+export class PersonalListService {
+  private db: ReturnType<typeof drizzle> | null;
+
+  constructor() {
+    this.db = getDB();
+  }
+
+  // Blocklist management
+  async addToBlocklist(userId: string, emailOrDomain: string, type: 'email' | 'domain', reason?: string): Promise<PersonalBlocklist> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const newEntry = await this.db
+      .insert(personalBlocklistTable)
+      .values({
+        userId,
+        emailOrDomain: emailOrDomain.toLowerCase(),
+        type,
+        reason,
+        createdAt: new Date(),
+      })
+      .returning()
+      .get();
+
+    return newEntry;
+  }
+
+  async removeFromBlocklist(userId: string, id: number): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const result = await this.db
+      .delete(personalBlocklistTable)
+      .where(and(
+        eq(personalBlocklistTable.id, id),
+        eq(personalBlocklistTable.userId, userId)
+      ))
+      .run();
+
+    return result.rowsAffected > 0;
+  }
+
+  async getBlocklist(userId: string): Promise<PersonalBlocklist[]> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    return await this.db
+      .select()
+      .from(personalBlocklistTable)
+      .where(eq(personalBlocklistTable.userId, userId))
+      .orderBy(personalBlocklistTable.createdAt)
+      .all();
+  }
+
+  async isBlocked(userId: string, email: string): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const emailLower = email.toLowerCase();
+    const domain = emailLower.split('@')[1];
+
+    const blocked = await this.db
+      .select()
+      .from(personalBlocklistTable)
+      .where(and(
+        eq(personalBlocklistTable.userId, userId),
+        sql`(
+          (${personalBlocklistTable.type} = 'email' AND ${personalBlocklistTable.emailOrDomain} = ${emailLower}) OR
+          (${personalBlocklistTable.type} = 'domain' AND ${personalBlocklistTable.emailOrDomain} = ${domain})
+        )`
+      ))
+      .limit(1)
+      .get();
+
+    return !!blocked;
+  }
+
+  // Whitelist management
+  async addToWhitelist(userId: string, emailOrDomain: string, type: 'email' | 'domain', reason?: string): Promise<PersonalWhitelist> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const newEntry = await this.db
+      .insert(personalWhitelistTable)
+      .values({
+        userId,
+        emailOrDomain: emailOrDomain.toLowerCase(),
+        type,
+        reason,
+        createdAt: new Date(),
+      })
+      .returning()
+      .get();
+
+    return newEntry;
+  }
+
+  async removeFromWhitelist(userId: string, id: number): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const result = await this.db
+      .delete(personalWhitelistTable)
+      .where(and(
+        eq(personalWhitelistTable.id, id),
+        eq(personalWhitelistTable.userId, userId)
+      ))
+      .run();
+
+    return result.rowsAffected > 0;
+  }
+
+  async getWhitelist(userId: string): Promise<PersonalWhitelist[]> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    return await this.db
+      .select()
+      .from(personalWhitelistTable)
+      .where(eq(personalWhitelistTable.userId, userId))
+      .orderBy(personalWhitelistTable.createdAt)
+      .all();
+  }
+
+  async isWhitelisted(userId: string, email: string): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const emailLower = email.toLowerCase();
+    const domain = emailLower.split('@')[1];
+
+    const whitelisted = await this.db
+      .select()
+      .from(personalWhitelistTable)
+      .where(and(
+        eq(personalWhitelistTable.userId, userId),
+        sql`(
+          (${personalWhitelistTable.type} = 'email' AND ${personalWhitelistTable.emailOrDomain} = ${emailLower}) OR
+          (${personalWhitelistTable.type} = 'domain' AND ${personalWhitelistTable.emailOrDomain} = ${domain})
+        )`
+      ))
+      .limit(1)
+      .get();
+
+    return !!whitelisted;
+  }
+
+  // Get combined personal validation result
+  async getPersonalValidation(userId: string, email: string): Promise<{
+    isBlocked: boolean;
+    isWhitelisted: boolean;
+    personalOverride: boolean;
+  }> {
+    const [isBlocked, isWhitelisted] = await Promise.all([
+      this.isBlocked(userId, email),
+      this.isWhitelisted(userId, email)
+    ]);
+
+    // Whitelist takes precedence over blocklist
+    const personalOverride = isWhitelisted || isBlocked;
+
+    return {
+      isBlocked,
+      isWhitelisted,
+      personalOverride
     };
   }
 }

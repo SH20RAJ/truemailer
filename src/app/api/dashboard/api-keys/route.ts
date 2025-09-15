@@ -12,11 +12,11 @@ export async function GET() {
     const apiKeyService = new ApiKeyService()
     const apiKeys = await apiKeyService.getUserApiKeys(user.id)
     
-    // Transform for client response (hide sensitive data)
+    // Transform for client response - show more of the key for user convenience
     const clientApiKeys = apiKeys.map(key => ({
       id: key.id,
       name: key.name,
-      keyPreview: `${key.id.substring(0, 8)}...`,
+      keyPreview: `tm_${key.id.substring(0, 16)}...${key.id.substring(-4)}`, // Show more characters
       isActive: Boolean(key.isActive),
       monthlyQuota: key.monthlyQuota || 0,
       currentUsage: key.currentUsage || 0,

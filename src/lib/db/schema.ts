@@ -57,6 +57,25 @@ export const apiUsageTable = sqliteTable("api_usage", {
   timestamp: int("timestamp", { mode: "timestamp" }).notNull(),
 });
 
+// Personal blocklist and whitelist tables
+export const personalBlocklistTable = sqliteTable("personal_blocklist", {
+  id: int("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  emailOrDomain: text("email_or_domain").notNull(), // Can be email or domain
+  type: text("type").notNull(), // 'email' or 'domain'
+  reason: text("reason"), // Optional reason for blocking
+  createdAt: int("created_at", { mode: "timestamp" }).notNull(),
+});
+
+export const personalWhitelistTable = sqliteTable("personal_whitelist", {
+  id: int("id").primaryKey({ autoIncrement: true }),
+  userId: text("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  emailOrDomain: text("email_or_domain").notNull(), // Can be email or domain
+  type: text("type").notNull(), // 'email' or 'domain'
+  reason: text("reason"), // Optional reason for allowing
+  createdAt: int("created_at", { mode: "timestamp" }).notNull(),
+});
+
 // Export types for TypeScript
 export type User = typeof usersTable.$inferSelect;
 export type NewUser = typeof usersTable.$inferInsert;
@@ -68,3 +87,7 @@ export type ApiKey = typeof apiKeysTable.$inferSelect;
 export type NewApiKey = typeof apiKeysTable.$inferInsert;
 export type ApiUsage = typeof apiUsageTable.$inferSelect;
 export type NewApiUsage = typeof apiUsageTable.$inferInsert;
+export type PersonalBlocklist = typeof personalBlocklistTable.$inferSelect;
+export type NewPersonalBlocklist = typeof personalBlocklistTable.$inferInsert;
+export type PersonalWhitelist = typeof personalWhitelistTable.$inferSelect;
+export type NewPersonalWhitelist = typeof personalWhitelistTable.$inferInsert;
