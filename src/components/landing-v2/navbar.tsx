@@ -11,13 +11,9 @@ export function Navbar() {
 
     const navItems = [
         { name: "Features", href: "#features" },
-        { name: "How it Works", href: "#how-it-works" },
-        { name: "Integration", href: "#quick-integration" },
-        { name: "Test API", href: "/test-api" },
+        { name: "Playground", href: "/test-api" },
         { name: "Help Improve", href: "/help-improve" },
         { name: "Dashboard", href: "/dashboard" },
-        { name: "Test Auth", href: "/test-auth" },
-        { name: "Test DB", href: "/todo" },
     ];
 
     return (
