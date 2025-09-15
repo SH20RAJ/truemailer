@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { AuthButtons } from "@/components/auth-buttons";
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,9 @@ export function Navbar() {
         { name: "Integration", href: "#quick-integration" },
         { name: "Test API", href: "/test-api" },
         { name: "Help Improve", href: "/help-improve" },
+        { name: "Dashboard", href: "/dashboard" },
+        { name: "Test Auth", href: "/test-auth" },
+        { name: "Test DB", href: "/todo" },
     ];
 
     return (
@@ -38,16 +42,14 @@ export function Navbar() {
                         ))}
                     </div>
 
-                    {/* Desktop CTA */}
+                    {/* Desktop CTA and Auth */}
                     <div className="hidden md:flex items-center space-x-4">
                         <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" asChild>
                             <Link href="https://github.com/sh20raj/truemailer" target="_blank">
                                 GitHub
                             </Link>
                         </Button>
-                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-                            <Link href="#get-started">Get Started</Link>
-                        </Button>
+                        <AuthButtons />
                     </div>
 
                     {/* Mobile menu button */}
@@ -96,9 +98,9 @@ export function Navbar() {
                                         GitHub
                                     </Link>
                                 </Button>
-                                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground" asChild>
-                                    <Link href="#get-started">Get Started</Link>
-                                </Button>
+                                <div className="pt-2">
+                                    <AuthButtons />
+                                </div>
                             </div>
                         </div>
                     </motion.div>

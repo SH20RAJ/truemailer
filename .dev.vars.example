@@ -1,0 +1,16 @@
+# Environment variables for local development
+# Copy this file to .dev.vars and fill in your actual values
+
+# Cloudflare D1 Database Configuration
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id_here
+CLOUDFLARE_DATABASE_ID=your_d1_database_id_here
+CLOUDFLARE_D1_TOKEN=your_cloudflare_api_token_here
+
+# StackAuth Configuration
+NEXT_PUBLIC_STACK_PROJECT_ID=your_stack_project_id_here
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=your_stack_publishable_client_key_here
+STACK_SECRET_SERVER_KEY=your_stack_secret_server_key_here
+
+# Next.js Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here

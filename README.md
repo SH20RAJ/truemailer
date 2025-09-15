@@ -4,11 +4,14 @@ TruMailer is a lightweight and fast **email validation API** built to help devel
 It’s simple to use, easy to deploy, and designed for speed.
 
 ---
+## 📋 Data Sources
 
-https://github.com/disposable-email-domains/disposable-email-domains/blob/main/allowlist.conf
+TruMailer leverages community-maintained datasets to provide accurate email validation:
 
-https://github.com/disposable-email-domains/disposable-email-domains/blob/main/disposable_email_blocklist.conf
+- **[Allowlist Domains](https://github.com/disposable-email-domains/disposable-email-domains/blob/main/allowlist.conf)** - Trusted email providers that should not be blocked
+- **[Disposable Email Blocklist](https://github.com/disposable-email-domains/disposable-email-domains/blob/main/disposable_email_blocklist.conf)** - Comprehensive list of temporary email providers
 
+These datasets are regularly updated to ensure optimal detection accuracy.
 
 ## 🚀 Features
 - ✅ Syntax validation (RFC compliant)
