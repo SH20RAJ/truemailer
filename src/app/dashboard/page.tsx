@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { AuthButtons } from "@/components/auth-buttons";
 import { 
   Calendar, Mail, User, Shield, Clock, Key, BarChart3, 
-  Plus, Copy, Eye, EyeOff, Trash2, Loader2 
+  Plus, Copy, Eye, EyeOff, Trash2, Loader2, Code, BookOpen, Play
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ApiKey {
   id: string;
@@ -35,6 +37,16 @@ interface ApiStats {
   endpointUsage?: { endpoint: string; requests: number }[];
 }
 
+interface PlaygroundResult {
+  email: string;
+  valid: boolean;
+  syntax_valid: boolean;
+  disposable: boolean | null;
+  role_based: boolean | null;
+  mx_records: boolean | null;
+  reason: string;
+}
+
 export default function Dashboard() {
   const user = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
@@ -46,6 +58,13 @@ export default function Dashboard() {
   const [showNewKey, setShowNewKey] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
+  
+  // Playground state
+  const [playgroundEmail, setPlaygroundEmail] = useState("xepeg24004@merumart.com");
+  const [playgroundApiKey, setPlaygroundApiKey] = useState("");
+  const [playgroundResult, setPlaygroundResult] = useState<PlaygroundResult | null>(null);
+  const [playgroundLoading, setPlaygroundLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Auto-sync user on page load
   useEffect(() => {
@@ -151,6 +170,41 @@ export default function Dashboard() {
     setVisibleKeys(newVisible);
   };
 
+  const testPlaygroundApi = async () => {
+    if (!playgroundApiKey || !playgroundEmail) {
+      alert('Please provide both API key and email');
+      return;
+    }
+
+    try {
+      setPlaygroundLoading(true);
+      const response = await fetch('/api/v2/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-API-Key': playgroundApiKey
+        },
+        body: JSON.stringify({ email: playgroundEmail })
+      });
+
+      const result = await response.json() as PlaygroundResult;
+      setPlaygroundResult(result);
+    } catch (error) {
+      console.error('API test failed:', error);
+      setPlaygroundResult({
+        email: playgroundEmail,
+        valid: false,
+        syntax_valid: false,
+        disposable: null,
+        role_based: null,
+        mx_records: null,
+        reason: 'API request failed'
+      });
+    } finally {
+      setPlaygroundLoading(false);
+    }
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto py-8 px-4">
@@ -183,7 +237,15 @@ export default function Dashboard() {
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : (
-          <div className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="playground">Playground</TabsTrigger>
+              <TabsTrigger value="docs">Documentation</TabsTrigger>
+            </TabsList>
+
+            {/* Overview Tab */}
+            <TabsContent value="overview" className="space-y-6">
             {/* User Info & Quick Stats */}
             <div className="grid gap-6 md:grid-cols-4">
               <Card>
@@ -451,7 +513,225 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             )}
-          </div>
+            </TabsContent>
+
+            {/* Playground Tab */}
+            <TabsContent value="playground" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Play className="w-5 h-5" />
+                    API Playground
+                  </CardTitle>
+                  <CardDescription>
+                    Test your API keys with live email validation
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label htmlFor="playground-api-key">API Key</Label>
+                      <Input
+                        id="playground-api-key"
+                        type="password"
+                        value={playgroundApiKey}
+                        onChange={(e) => setPlaygroundApiKey(e.target.value)}
+                        placeholder="tm_your_api_key_here"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="playground-email">Email to Test</Label>
+                      <Input
+                        id="playground-email"
+                        value={playgroundEmail}
+                        onChange={(e) => setPlaygroundEmail(e.target.value)}
+                        placeholder="test@example.com"
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button onClick={testPlaygroundApi} disabled={playgroundLoading} className="w-full">
+                    {playgroundLoading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Play className="w-4 h-4 mr-2" />
+                    )}
+                    Test API
+                  </Button>
+
+                  {playgroundResult && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-medium mb-3">Response</h4>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Valid:</span>
+                            <Badge variant={playgroundResult.valid ? "default" : "destructive"}>
+                              {playgroundResult.valid ? "Yes" : "No"}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Syntax Valid:</span>
+                            <Badge variant={playgroundResult.syntax_valid ? "default" : "destructive"}>
+                              {playgroundResult.syntax_valid ? "Yes" : "No"}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Disposable:</span>
+                            <Badge variant={playgroundResult.disposable ? "destructive" : "default"}>
+                              {playgroundResult.disposable === null ? "Unknown" : playgroundResult.disposable ? "Yes" : "No"}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm">Role-based:</span>
+                            <Badge variant={playgroundResult.role_based ? "secondary" : "default"}>
+                              {playgroundResult.role_based === null ? "Unknown" : playgroundResult.role_based ? "Yes" : "No"}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-medium mb-2">Raw Response</h5>
+                          <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-40">
+                            {JSON.stringify(playgroundResult, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Documentation Tab */}
+            <TabsContent value="docs" className="space-y-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BookOpen className="w-5 h-5" />
+                      Getting Started
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">1. Create an API Key</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Go to the Overview tab and create your first API key. Choose a descriptive name and set your monthly quota.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">2. Make Your First Request</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Use the playground to test your API key, or make a POST request to /api/v2/validate with your API key in the X-API-Key header.
+                      </p>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">3. Monitor Usage</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Track your API usage and monitor your monthly quota in the analytics section.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>API Reference</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Endpoint</h4>
+                      <code className="text-xs bg-muted px-2 py-1 rounded">POST /api/v2/validate</code>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Headers</h4>
+                      <div className="space-y-1">
+                        <code className="text-xs bg-muted px-2 py-1 rounded block">Content-Type: application/json</code>
+                        <code className="text-xs bg-muted px-2 py-1 rounded block">X-API-Key: tm_your_api_key</code>
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Request Body</h4>
+                      <pre className="text-xs bg-muted p-3 rounded">
+{`{
+  "email": "test@example.com"
+}`}
+                      </pre>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Response</h4>
+                      <pre className="text-xs bg-muted p-3 rounded">
+{`{
+  "email": "test@example.com",
+  "valid": true,
+  "syntax_valid": true,
+  "disposable": false,
+  "role_based": false,
+  "mx_records": true,
+  "reason": "Valid email"
+}`}
+                      </pre>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Code Examples</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="curl" className="w-full">
+                    <TabsList>
+                      <TabsTrigger value="curl">cURL</TabsTrigger>
+                      <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+                      <TabsTrigger value="python">Python</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="curl">
+                      <pre className="text-xs bg-muted p-4 rounded overflow-auto">
+{`curl -X POST http://localhost:3000/api/v2/validate \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: tm_your_api_key_here" \
+  -d '{"email": "test@example.com"}'`}
+                      </pre>
+                    </TabsContent>
+                    <TabsContent value="javascript">
+                      <pre className="text-xs bg-muted p-4 rounded overflow-auto">
+{`const response = await fetch('/api/v2/validate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': 'tm_your_api_key_here'
+  },
+  body: JSON.stringify({ email: 'test@example.com' })
+});
+
+const result = await response.json();
+console.log(result);`}
+                      </pre>
+                    </TabsContent>
+                    <TabsContent value="python">
+                      <pre className="text-xs bg-muted p-4 rounded overflow-auto">
+{`import requests
+
+response = requests.post(
+    'http://localhost:3000/api/v2/validate',
+    headers={
+        'Content-Type': 'application/json',
+        'X-API-Key': 'tm_your_api_key_here'
+    },
+    json={'email': 'test@example.com'}
+)
+
+result = response.json()
+print(result)`}
+                      </pre>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import { AnalyticsService } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
+  let originalBody = ''
   
   // Validate API key
   const { valid, context, error } = await validateApiKey(request)
@@ -13,6 +14,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json() as { email?: string }
+    const originalBody = JSON.stringify(body)
     const { email } = body
 
     if (!email) {
@@ -37,7 +39,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Log usage
-      await logApiUsage(context!, request, 200, Date.now() - startTime, result)
+      await logApiUsage(context!, request, 200, Date.now() - startTime, result, originalBody)
       
       return createApiResponse(result)
     }
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log usage
-    await logApiUsage(context!, request, 200, Date.now() - startTime, result)
+    await logApiUsage(context!, request, 200, Date.now() - startTime, result, originalBody)
 
     return createApiResponse(result)
 
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
     console.error('Email validation error:', error)
     
     // Log failed usage
-    await logApiUsage(context!, request, 500, Date.now() - startTime, { error: 'Internal server error' })
+    await logApiUsage(context!, request, 500, Date.now() - startTime, { error: 'Internal server error' }, originalBody)
     
     return createApiError('Internal server error', 500)
   }
@@ -93,7 +95,8 @@ async function logApiUsage(
   request: NextRequest, 
   statusCode: number, 
   responseTime: number, 
-  result: Record<string, unknown>
+  result: Record<string, unknown>,
+  originalBody?: string
 ) {
   try {
     const analyticsService = new AnalyticsService()
@@ -105,7 +108,7 @@ async function logApiUsage(
                      undefined
 
     // Estimate sizes (simplified)
-    const requestSize = JSON.stringify(await request.clone().json()).length
+    const requestSize = originalBody ? originalBody.length : 0
     const responseSize = JSON.stringify(result).length
 
     await analyticsService.logApiUsage({
