@@ -15,6 +15,13 @@
       "when": 1757934392072,
       "tag": "0001_odd_puma",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1757938120921,
+      "tag": "0002_smart_fabian_cortez",
+      "breakpoints": true
     }
   ]
 }

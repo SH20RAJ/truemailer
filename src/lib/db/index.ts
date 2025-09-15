@@ -1,7 +1,21 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { eq } from 'drizzle-orm';
-import { usersTable, sessionsTable, todosTable, type User, type NewUser, type Todo, type NewTodo } from './schema';
+import { eq, and, gte, sql } from 'drizzle-orm';
+import { 
+  usersTable, 
+  sessionsTable, 
+  todosTable, 
+  apiKeysTable, 
+  apiUsageTable,
+  type User, 
+  type NewUser, 
+  type Todo, 
+  type NewTodo,
+  type ApiKey,
+  type NewApiKey,
+  type ApiUsage,
+  type NewApiUsage
+} from './schema';
 import * as schema from './schema';
 
 // Initialize Turso client and Drizzle
@@ -293,5 +307,313 @@ export class TodoService {
         message: `Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
       };
     }
+  }
+}
+
+// API Key Management Service
+export class ApiKeyService {
+  private db: ReturnType<typeof drizzle> | null;
+
+  constructor() {
+    this.db = getDB();
+  }
+
+  // Generate a new API key for a user
+  async createApiKey(userId: string, name: string, monthlyQuota: number = 5000): Promise<{ apiKey: ApiKey; secretKey: string }> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    // Generate a unique API key
+    const secretKey = `tm_${crypto.randomUUID().replace(/-/g, '')}`;
+    const keyHash = await this.hashApiKey(secretKey);
+    
+    const now = new Date();
+    const id = crypto.randomUUID();
+
+    const newApiKey = await this.db
+      .insert(apiKeysTable)
+      .values({
+        id,
+        userId,
+        keyHash,
+        name,
+        isActive: true,
+        monthlyQuota,
+        currentUsage: 0,
+        lastUsageReset: now,
+        createdAt: now,
+      })
+      .returning()
+      .get();
+
+    return { apiKey: newApiKey, secretKey };
+  }
+
+  // Hash API key for storage
+  private async hashApiKey(apiKey: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(apiKey);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Verify and get API key
+  async verifyApiKey(apiKey: string): Promise<ApiKey | null> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const keyHash = await this.hashApiKey(apiKey);
+    
+    const apiKeyRecord = await this.db
+      .select()
+      .from(apiKeysTable)
+      .where(and(eq(apiKeysTable.keyHash, keyHash), eq(apiKeysTable.isActive, true)))
+      .get();
+
+    if (!apiKeyRecord) {
+      return null;
+    }
+
+    // Check if usage needs to be reset (monthly)
+    const now = new Date();
+    const lastReset = new Date(apiKeyRecord.lastUsageReset);
+    const monthDiff = (now.getFullYear() - lastReset.getFullYear()) * 12 + (now.getMonth() - lastReset.getMonth());
+    
+    if (monthDiff >= 1) {
+      // Reset monthly usage
+      await this.db
+        .update(apiKeysTable)
+        .set({
+          currentUsage: 0,
+          lastUsageReset: now,
+        })
+        .where(eq(apiKeysTable.id, apiKeyRecord.id))
+        .run();
+      
+      apiKeyRecord.currentUsage = 0;
+      apiKeyRecord.lastUsageReset = now;
+    }
+
+    return apiKeyRecord;
+  }
+
+  // Increment API usage
+  async incrementUsage(apiKeyId: string): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const result = await this.db
+      .update(apiKeysTable)
+      .set({
+        currentUsage: sql`${apiKeysTable.currentUsage} + 1`,
+        lastUsedAt: new Date(),
+      })
+      .where(eq(apiKeysTable.id, apiKeyId))
+      .run();
+
+    return result.rowsAffected > 0;
+  }
+
+  // Get user's API keys
+  async getUserApiKeys(userId: string): Promise<ApiKey[]> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    return await this.db
+      .select()
+      .from(apiKeysTable)
+      .where(eq(apiKeysTable.userId, userId))
+      .all();
+  }
+
+  // Update API key
+  async updateApiKey(apiKeyId: string, updates: Partial<Pick<ApiKey, 'name' | 'isActive' | 'monthlyQuota'>>): Promise<ApiKey | null> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const updatedKey = await this.db
+      .update(apiKeysTable)
+      .set(updates)
+      .where(eq(apiKeysTable.id, apiKeyId))
+      .returning()
+      .get();
+
+    return updatedKey || null;
+  }
+
+  // Delete API key
+  async deleteApiKey(apiKeyId: string): Promise<boolean> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const result = await this.db
+      .delete(apiKeysTable)
+      .where(eq(apiKeysTable.id, apiKeyId))
+      .run();
+
+    return result.rowsAffected > 0;
+  }
+}
+
+// Analytics Service
+export class AnalyticsService {
+  private db: ReturnType<typeof drizzle> | null;
+
+  constructor() {
+    this.db = getDB();
+  }
+
+  // Log API usage
+  async logApiUsage(data: {
+    apiKeyId: string;
+    userId: string;
+    endpoint: string;
+    method: string;
+    statusCode: number;
+    responseTime?: number;
+    ipAddress?: string;
+    userAgent?: string;
+    requestSize?: number;
+    responseSize?: number;
+  }): Promise<void> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    await this.db
+      .insert(apiUsageTable)
+      .values({
+        ...data,
+        timestamp: new Date(),
+      })
+      .run();
+  }
+
+  // Get usage analytics for a user
+  async getUserAnalytics(userId: string, days: number = 30): Promise<{
+    totalRequests: number;
+    successfulRequests: number;
+    errorRequests: number;
+    averageResponseTime: number;
+    dailyUsage: Array<{ date: string; requests: number }>;
+    endpointUsage: Array<{ endpoint: string; requests: number }>;
+    statusCodeDistribution: Array<{ statusCode: number; count: number }>;
+  }> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    // Get all usage data for the period
+    const usageData = await this.db
+      .select()
+      .from(apiUsageTable)
+      .where(and(
+        eq(apiUsageTable.userId, userId),
+        gte(apiUsageTable.timestamp, startDate)
+      ))
+      .all();
+
+    // Calculate metrics
+    const totalRequests = usageData.length;
+    const successfulRequests = usageData.filter(u => u.statusCode >= 200 && u.statusCode < 300).length;
+    const errorRequests = usageData.filter(u => u.statusCode >= 400).length;
+    const averageResponseTime = usageData.reduce((sum, u) => sum + (u.responseTime || 0), 0) / totalRequests || 0;
+
+    // Daily usage
+    const dailyUsageMap = new Map<string, number>();
+    usageData.forEach(u => {
+      const date = u.timestamp.toISOString().split('T')[0];
+      dailyUsageMap.set(date, (dailyUsageMap.get(date) || 0) + 1);
+    });
+    const dailyUsage = Array.from(dailyUsageMap.entries()).map(([date, requests]) => ({ date, requests }));
+
+    // Endpoint usage
+    const endpointUsageMap = new Map<string, number>();
+    usageData.forEach(u => {
+      endpointUsageMap.set(u.endpoint, (endpointUsageMap.get(u.endpoint) || 0) + 1);
+    });
+    const endpointUsage = Array.from(endpointUsageMap.entries()).map(([endpoint, requests]) => ({ endpoint, requests }));
+
+    // Status code distribution
+    const statusCodeMap = new Map<number, number>();
+    usageData.forEach(u => {
+      statusCodeMap.set(u.statusCode, (statusCodeMap.get(u.statusCode) || 0) + 1);
+    });
+    const statusCodeDistribution = Array.from(statusCodeMap.entries()).map(([statusCode, count]) => ({ statusCode, count }));
+
+    return {
+      totalRequests,
+      successfulRequests,
+      errorRequests,
+      averageResponseTime,
+      dailyUsage,
+      endpointUsage,
+      statusCodeDistribution,
+    };
+  }
+
+  // Get API key specific analytics
+  async getApiKeyAnalytics(apiKeyId: string, days: number = 30): Promise<{
+    totalRequests: number;
+    remainingQuota: number;
+    usagePercentage: number;
+    dailyUsage: Array<{ date: string; requests: number }>;
+  }> {
+    if (!this.db) {
+      throw new Error('Database not available');
+    }
+
+    // Get API key info
+    const apiKey = await this.db
+      .select()
+      .from(apiKeysTable)
+      .where(eq(apiKeysTable.id, apiKeyId))
+      .get();
+
+    if (!apiKey) {
+      throw new Error('API key not found');
+    }
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    // Get usage data
+    const usageData = await this.db
+      .select()
+      .from(apiUsageTable)
+      .where(and(
+        eq(apiUsageTable.apiKeyId, apiKeyId),
+        gte(apiUsageTable.timestamp, startDate)
+      ))
+      .all();
+
+    const totalRequests = usageData.length;
+    const remainingQuota = Math.max(0, (apiKey.monthlyQuota || 0) - (apiKey.currentUsage || 0));
+    const usagePercentage = ((apiKey.currentUsage || 0) / (apiKey.monthlyQuota || 1)) * 100;
+
+    // Daily usage
+    const dailyUsageMap = new Map<string, number>();
+    usageData.forEach(u => {
+      const date = u.timestamp.toISOString().split('T')[0];
+      dailyUsageMap.set(date, (dailyUsageMap.get(date) || 0) + 1);
+    });
+    const dailyUsage = Array.from(dailyUsageMap.entries()).map(([date, requests]) => ({ date, requests }));
+
+    return {
+      totalRequests,
+      remainingQuota,
+      usagePercentage,
+      dailyUsage,
+    };
   }
 }

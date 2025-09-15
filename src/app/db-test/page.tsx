@@ -49,6 +49,23 @@ export default function DatabaseTest() {
     }
   };
 
+  const handleMigrateApiTables = async () => {
+    try {
+      const response = await fetch('/api/migrate-api-tables', {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        const result = await response.json() as { message: string; error?: string };
+        alert('Migration successful: ' + result.message);
+      } else {
+        alert('Migration failed');
+      }
+    } catch (error) {
+      alert('Migration error: ' + error);
+    }
+  };
+
   useEffect(() => {
     fetchDbStats();
   }, [user]);
@@ -229,6 +246,15 @@ export default function DatabaseTest() {
                   <Database className="w-4 h-4" />
                 )}
                 Refresh Stats
+              </Button>
+              
+              <Button 
+                onClick={handleMigrateApiTables}
+                variant="secondary"
+                className="flex items-center gap-2"
+              >
+                <Database className="w-4 h-4" />
+                Migrate API Tables
               </Button>
             </div>
           </CardContent>
