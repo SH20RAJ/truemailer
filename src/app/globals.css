@@ -57,6 +57,33 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Dashboard-only theme overrides (Twitter-inspired) */
+  .dashboard-theme {
+    /* Core brand accent (Twitter-esque but distinct) */
+    --color-primary: #1a8cd8; /* slightly deeper than Twitter blue */
+    --color-primary-foreground: #ffffff;
+
+    /* Sidebar palette */
+    --color-sidebar: #000000; /* pure black sidebar */
+    --color-sidebar-foreground: #e6e9ef; /* soft off-white text */
+    --color-sidebar-accent: #0f1419; /* subtle hover/active bg */
+    --color-sidebar-accent-foreground: #f8fafc; /* text on accent */
+    --color-sidebar-border: #2f3336; /* divider lines */
+    --color-sidebar-ring: #1a8cd8; /* focus ring */
+
+    /* General surfaces in dashboard area */
+    --color-background: #000000;
+    --color-foreground: #e6e9ef;
+    --color-card: #0a0a0a;
+    --color-card-foreground: #e6e9ef;
+    --color-muted: #0a0f14;
+    --color-muted-foreground: #9aa4ae;
+    --color-border: #2f3336;
+    --color-input: #2f3336;
+    --color-accent: #1a8cd8; /* used in some components */
+    --color-accent-foreground: #ffffff;
+  }
 }
 
 /* Custom utilities */

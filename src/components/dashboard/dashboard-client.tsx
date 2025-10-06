@@ -2,6 +2,7 @@
 
 import { useUser } from "@stackframe/stack";
 import { useState, useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,17 @@ export function DashboardClient() {
   const [playgroundApiKey, setPlaygroundApiKey] = useState("");
   const [playgroundResult, setPlaygroundResult] = useState<PlaygroundResult | null>(null);
   const [playgroundLoading, setPlaygroundLoading] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Sync tabs with ?tab= query param
+  useEffect(() => {
+    const q = searchParams?.get("tab") || "overview";
+    setActiveTab(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   // Auto-sync user on page load
   useEffect(() => {
@@ -250,7 +261,16 @@ export function DashboardClient() {
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : (
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <Tabs
+            value={activeTab}
+            onValueChange={(val) => {
+              setActiveTab(val);
+              const params = new URLSearchParams(searchParams ?? undefined);
+              params.set("tab", val);
+              router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+            }}
+            className="space-y-6"
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="playground">Playground</TabsTrigger>
