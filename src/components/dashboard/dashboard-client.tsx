@@ -13,6 +13,17 @@ import {
   Calendar, Mail, User, Shield, Clock, Key, BarChart3, 
   Plus, Copy, Eye, EyeOff, Trash2, Loader2, Code, BookOpen, Play, ShieldCheck
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip as ReTooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
+} from "recharts";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalListsClient } from "./personal-lists-client";
@@ -266,7 +277,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
               <header.icon className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold leading-tight">{header.title}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight leading-tight">{header.title}</h1>
               <p className="text-sm text-muted-foreground">{header.desc}</p>
             </div>
           </div>
@@ -504,6 +515,48 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                     <div className="p-4 border-t md:border-l border-border/50">
                       <div className="text-xs text-muted-foreground">Avg Response</div>
                       <div className="text-lg font-semibold">{apiStats.averageResponseTime}ms</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-t border-border/50">
+                    {/* Daily usage line chart */}
+                    <div className="col-span-2 h-56 rounded-md bg-background">
+                      {apiStats.dailyUsage && apiStats.dailyUsage.length > 0 ? (
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={apiStats.dailyUsage} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+                            <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }}
+                              tickFormatter={(d) => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                              axisLine={false}
+                              tickLine={false}
+                            />
+                            <YAxis tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                            <ReTooltip
+                              contentStyle={{ background: '#0a0a0a', border: '1px solid #2f3336', borderRadius: 8 }}
+                              labelFormatter={(d) => new Date(d as string).toLocaleDateString()}
+                            />
+                            <Line type="monotone" dataKey="count" stroke="#1a8cd8" strokeWidth={2} dot={false} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      ) : (
+                        <div className="h-full grid place-items-center text-xs text-muted-foreground">No daily data</div>
+                      )}
+                    </div>
+
+                    {/* Success vs Error bar */}
+                    <div className="h-56 rounded-md bg-background">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={[{ name: 'Requests', success: apiStats.successfulRequests, error: apiStats.errorRequests }]}
+                          margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+                          <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} />
+                          <YAxis tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                          <ReTooltip contentStyle={{ background: '#0a0a0a', border: '1px solid #2f3336', borderRadius: 8 }} />
+                          <Bar dataKey="success" fill="#16a34a" radius={[4,4,0,0]} />
+                          <Bar dataKey="error" fill="#ef4444" radius={[4,4,0,0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
                     </div>
                   </div>
                   <div className="p-4 border-t border-border/50">

@@ -54,6 +54,14 @@ export function PersonalListsClient() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'blocklist' | 'whitelist'>('blocklist');
 
+  // Bulk add state
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkListType, setBulkListType] = useState<'blocklist' | 'whitelist'>('blocklist');
+  const [bulkText, setBulkText] = useState("");
+  const [bulkType, setBulkType] = useState<'auto' | 'email' | 'domain'>('auto');
+  const [bulkReason, setBulkReason] = useState("");
+  const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(null);
+
   // Fetch lists on component mount
   useEffect(() => {
     fetchLists();
@@ -155,6 +163,60 @@ export function PersonalListsClient() {
     setError("");
   };
 
+  const openBulkDialog = (listType: 'blocklist' | 'whitelist') => {
+    setBulkListType(listType);
+    setBulkOpen(true);
+    setError("");
+  };
+
+  const addBulkToList = async () => {
+    const lines = bulkText
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0)
+    if (lines.length === 0) {
+      setError('Please paste one or more emails/domains');
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      setError("");
+      setBulkProgress({ current: 0, total: lines.length });
+
+      const endpoint = bulkListType === 'blocklist' ? '/api/dashboard/blocklist' : '/api/dashboard/whitelist';
+      let success = 0;
+      for (let i = 0; i < lines.length; i++) {
+        const value = lines[i];
+        const inferredType: 'email' | 'domain' = bulkType === 'auto' ? (value.includes('@') ? 'email' : 'domain') : bulkType;
+        try {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ emailOrDomain: value, type: inferredType, reason: bulkReason })
+          });
+          if (res.ok) success++;
+        } catch (_) {
+          // ignore individual failures, continue
+        }
+        setBulkProgress({ current: i + 1, total: lines.length });
+      }
+
+      // Reset and refresh
+      setBulkOpen(false);
+      setBulkText("");
+      setBulkReason("");
+      setBulkType('auto');
+      setBulkProgress(null);
+      await fetchLists();
+    } catch (err) {
+      console.error('Bulk add error', err);
+      setError('Bulk add failed. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <Card>
@@ -209,10 +271,16 @@ export function PersonalListsClient() {
                     Emails and domains in this list will always be marked as invalid, regardless of other validation checks.
                   </CardDescription>
                 </div>
+                <div className="flex gap-2">
                 <Button onClick={() => openAddDialog('blocklist')} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Entry
                 </Button>
+                <Button variant="outline" onClick={() => openBulkDialog('blocklist')} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Bulk Add
+                </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -273,10 +341,16 @@ export function PersonalListsClient() {
                     Emails and domains in this list will always be marked as valid, overriding all other validation checks including blocklist entries.
                   </CardDescription>
                 </div>
+                <div className="flex gap-2">
                 <Button onClick={() => openAddDialog('whitelist')} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Entry
                 </Button>
+                <Button variant="outline" onClick={() => openBulkDialog('whitelist')} size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Bulk Add
+                </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent>
@@ -398,6 +472,68 @@ export function PersonalListsClient() {
               >
                 {actionLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 Add Entry
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Add Dialog */}
+      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>
+              Bulk add to {bulkListType === 'blocklist' ? 'Blocklist' : 'Whitelist'}
+            </DialogTitle>
+            <DialogDescription>
+              Paste one item per line. Choose type or use Auto to infer by “@”.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select value={bulkType} onValueChange={(v: 'auto' | 'email' | 'domain') => setBulkType(v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto (detect)</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="domain">Domain</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Entries</Label>
+              <Textarea
+                placeholder={"user@example.com\nexample.com\n..."}
+                rows={10}
+                value={bulkText}
+                onChange={(e) => setBulkText(e.target.value)}
+              />
+              <div className="text-xs text-muted-foreground">
+                {bulkText.split(/\r?\n/).filter((l) => l.trim()).length} items
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Reason (optional)</Label>
+              <Input value={bulkReason} onChange={(e) => setBulkReason(e.target.value)} placeholder="e.g. disposable provider" />
+            </div>
+
+            <div className="flex justify-end gap-2 items-center">
+              {bulkProgress && (
+                <span className="text-xs text-muted-foreground mr-auto">
+                  Adding {bulkProgress.current}/{bulkProgress.total}
+                </span>
+              )}
+              <Button variant="outline" onClick={() => setBulkOpen(false)} disabled={actionLoading}>
+                Cancel
+              </Button>
+              <Button onClick={addBulkToList} disabled={actionLoading || bulkText.trim().length === 0}>
+                {actionLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                Add All
               </Button>
             </div>
           </div>
