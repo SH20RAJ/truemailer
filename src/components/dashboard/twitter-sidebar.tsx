@@ -16,27 +16,13 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import {
-  Home,
-  Search,
-  Bell,
-  MessageSquare,
-  ListTodo,
-  Bookmark,
-  BarChart3,
-  Key,
-  BookOpen,
-  Settings,
-  User,
-  Feather,
-} from "lucide-react"
+import { Home, Play, ListTodo, BookOpen, Feather } from "lucide-react"
 import { useMemo } from "react"
 
 type NavItem = {
   label: string
   href: string
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
-  isActive?: (path: string, tab: string | null) => boolean
 }
 
 export function TwitterSidebar() {
@@ -46,19 +32,12 @@ export function TwitterSidebar() {
 
   const items: NavItem[] = useMemo(
     () => [
-      { label: "Home", href: "/dashboard?tab=overview", icon: Home, isActive: (_, t) => (t ?? "overview") === "overview" },
-      { label: "Explore", href: "/dashboard?tab=docs", icon: Search, isActive: (_, t) => t === "docs" },
-      { label: "Notifications", href: "/dashboard?tab=overview", icon: Bell, isActive: () => false },
-      { label: "Messages", href: "/dashboard?tab=playground", icon: MessageSquare, isActive: (_, t) => t === "playground" },
-      { label: "Lists", href: "/dashboard?tab=personal-lists", icon: ListTodo, isActive: (_, t) => t === "personal-lists" },
-      { label: "Bookmarks", href: "/dashboard", icon: Bookmark, isActive: () => false },
-      { label: "Analytics", href: "/dashboard?tab=overview", icon: BarChart3, isActive: (_, t) => (t ?? "overview") === "overview" },
-      { label: "API Keys", href: "/dashboard?tab=overview", icon: Key, isActive: (_, t) => (t ?? "overview") === "overview" },
-      { label: "Docs", href: "/dashboard?tab=docs", icon: BookOpen, isActive: (_, t) => t === "docs" },
-      { label: "Profile", href: "/dashboard", icon: User, isActive: () => false },
-      { label: "Settings", href: "/dashboard", icon: Settings, isActive: () => pathname?.endsWith("/settings") ?? false },
+      { label: "Overview", href: "/dashboard/overview", icon: Home },
+      { label: "Playground", href: "/dashboard/playground", icon: Play },
+      { label: "Personal Lists", href: "/dashboard/personal-lists", icon: ListTodo },
+      { label: "Docs", href: "/dashboard/docs", icon: BookOpen },
     ],
-    [pathname]
+    []
   )
 
   return (
@@ -82,7 +61,7 @@ export function TwitterSidebar() {
             <SidebarMenu>
               {items.map((item) => {
                 const ActiveIcon = item.icon
-                const active = item.isActive?.(pathname ?? "", tab) ?? false
+                const active = (pathname ?? "").startsWith(item.href)
                 return (
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton asChild isActive={active} size="lg">

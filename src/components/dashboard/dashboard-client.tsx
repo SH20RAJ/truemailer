@@ -61,7 +61,9 @@ interface PlaygroundResult {
   };
 }
 
-export function DashboardClient() {
+type Section = "overview" | "playground" | "personal-lists" | "docs";
+
+export function DashboardClient({ section }: { section?: Section } = {}) {
   const user = useUser();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [apiStats, setApiStats] = useState<ApiStats | null>(null);
@@ -81,14 +83,18 @@ export function DashboardClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<Section>(section ?? "overview");
 
-  // Sync tabs with ?tab= query param
+  // Derive active section from prop or query (fallback)
   useEffect(() => {
-    const q = searchParams?.get("tab") || "overview";
+    if (section) {
+      setActiveTab(section);
+      return;
+    }
+    const q = (searchParams?.get("tab") as Section | null) || "overview";
     setActiveTab(q);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [section, searchParams]);
 
   // Auto-sync user on page load
   useEffect(() => {
@@ -243,15 +249,26 @@ export function DashboardClient() {
     );
   }
 
+  // Page header details per section
+  const header = {
+    overview: { title: "Overview", desc: "Usage analytics and API keys at a glance.", icon: Key },
+    playground: { title: "Playground", desc: "Test email validation with your API key.", icon: Code },
+    "personal-lists": { title: "Personal Lists", desc: "Manage your blocklist and whitelist.", icon: ShieldCheck },
+    docs: { title: "Documentation", desc: "Integrate the TruMailer API v2 in minutes.", icon: BookOpen },
+  }[activeTab];
+
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-6 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">API Dashboard</h1>
-            <p className="text-muted-foreground">
-              Manage your API keys and monitor usage analytics
-            </p>
+        <div className="flex items-center justify-between mb-6 border-b border-border pb-4">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary/10 text-primary p-2">
+              <header.icon className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold leading-tight">{header.title}</h1>
+              <p className="text-sm text-muted-foreground">{header.desc}</p>
+            </div>
           </div>
           <AuthButtons />
         </div>
@@ -263,292 +280,251 @@ export function DashboardClient() {
         ) : (
           <Tabs
             value={activeTab}
-            onValueChange={(val) => {
+            onValueChange={(val: Section) => {
               setActiveTab(val);
-              const params = new URLSearchParams(searchParams ?? undefined);
-              params.set("tab", val);
-              router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+              // If on dedicated section page, navigate to the route;
+              // otherwise, keep query param for backward compatibility.
+              if (pathname?.startsWith("/dashboard/")) {
+                router.replace(`/dashboard/${val}`, { scroll: false });
+              } else {
+                const params = new URLSearchParams(searchParams ?? undefined);
+                params.set("tab", val);
+                router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+              }
             }}
             className="space-y-6"
           >
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="playground">Playground</TabsTrigger>
-              <TabsTrigger value="personal-lists">Personal Lists</TabsTrigger>
-              <TabsTrigger value="docs">Documentation</TabsTrigger>
-            </TabsList>
+            {!section && (
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="playground">Playground</TabsTrigger>
+                <TabsTrigger value="personal-lists">Personal Lists</TabsTrigger>
+                <TabsTrigger value="docs">Documentation</TabsTrigger>
+              </TabsList>
+            )}
 
             {/* Overview Tab */}
             <TabsContent value="overview" className="space-y-6">
-            {/* User Info & Quick Stats */}
-            <div className="grid gap-6 md:grid-cols-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <User className="w-8 h-8 text-blue-500" />
-                    <div>
-                      <p className="text-sm font-medium">Account</p>
-                      <p className="text-xs text-muted-foreground">{user.displayName || 'User'}</p>
-                    </div>
+            {/* Quick Metrics - minimal row */}
+            <div className="rounded-xl border border-border/50 overflow-hidden">
+              <div className="grid grid-cols-2 md:grid-cols-4">
+                <div className="p-4 flex items-center gap-3">
+                  <User className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Account</div>
+                    <div className="text-sm font-medium">{user.displayName || 'User'}</div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <Key className="w-8 h-8 text-green-500" />
-                    <div>
-                      <p className="text-sm font-medium">API Keys</p>
-                      <p className="text-xs text-muted-foreground">{apiKeys.length} active</p>
-                    </div>
+                </div>
+                <div className="p-4 flex items-center gap-3 border-t md:border-t-0 md:border-l border-border/50">
+                  <Key className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">API Keys</div>
+                    <div className="text-sm font-medium">{apiKeys.length} active</div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <BarChart3 className="w-8 h-8 text-purple-500" />
-                    <div>
-                      <p className="text-sm font-medium">This Month</p>
-                      <p className="text-xs text-muted-foreground">
-                        {apiStats?.totalRequests || 0} requests
-                      </p>
-                    </div>
+                </div>
+                <div className="p-4 flex items-center gap-3 border-t md:border-l border-border/50">
+                  <BarChart3 className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">This Month</div>
+                    <div className="text-sm font-medium">{apiStats?.totalRequests || 0} req</div>
                   </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-8 h-8 text-orange-500" />
-                    <div>
-                      <p className="text-sm font-medium">Avg Response</p>
-                      <p className="text-xs text-muted-foreground">
-                        {apiStats?.averageResponseTime || 0}ms
-                      </p>
-                    </div>
+                </div>
+                <div className="p-4 flex items-center gap-3 border-t md:border-l border-border/50">
+                  <Clock className="w-5 h-5 text-muted-foreground" />
+                  <div>
+                    <div className="text-xs text-muted-foreground">Avg Response</div>
+                    <div className="text-sm font-medium">{apiStats?.averageResponseTime || 0}ms</div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
 
-            {/* API Keys Management */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Key className="w-5 h-5" />
-                      API Keys
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your API keys for accessing the TruMailer API v2
-                    </CardDescription>
-                  </div>
-                  <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Key
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Create New API Key</DialogTitle>
-                        <DialogDescription>
-                          Create a new API key to access the TruMailer API v2
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="keyName">Key Name</Label>
-                          <Input
-                            id="keyName"
-                            value={newKeyName}
-                            onChange={(e) => setNewKeyName(e.target.value)}
-                            placeholder="e.g. Production API Key"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="keyQuota">Monthly Quota</Label>
-                          <Input
-                            id="keyQuota"
-                            type="number"
-                            value={newKeyQuota}
-                            onChange={(e) => setNewKeyQuota(parseInt(e.target.value) || 5000)}
-                            min={1000}
-                            max={100000}
-                          />
-                        </div>
-                        <Button 
-                          onClick={createApiKey} 
-                          disabled={creating || !newKeyName.trim()}
-                          className="w-full"
-                        >
-                          {creating ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Plus className="w-4 h-4 mr-2" />
-                          )}
-                          Create API Key
-                        </Button>
+            {/* API Keys - minimal */}
+            <section aria-labelledby="keys" className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 id="keys" className="text-base font-semibold">API Keys</h3>
+                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" className="rounded-full px-4">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Key
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New API Key</DialogTitle>
+                      <DialogDescription>
+                        Create a new API key to access the TruMailer API v2
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="keyName">Key Name</Label>
+                        <Input
+                          id="keyName"
+                          value={newKeyName}
+                          onChange={(e) => setNewKeyName(e.target.value)}
+                          placeholder="e.g. Production API Key"
+                        />
                       </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {showNewKey && (
-                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <p className="text-sm font-medium text-green-800 mb-2">
-                      🎉 New API Key Created!
-                    </p>
-                    <p className="text-xs text-green-700 mb-2">
-                      Please copy this key now. You won&apos;t be able to see the full key again for security reasons.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-white px-3 py-2 rounded border text-xs">
-                        {showNewKey}
-                      </code>
-                      <Button
-                        size="sm"
-                        onClick={() => copyToClipboard(showNewKey)}
+                      <div>
+                        <Label htmlFor="keyQuota">Monthly Quota</Label>
+                        <Input
+                          id="keyQuota"
+                          type="number"
+                          value={newKeyQuota}
+                          onChange={(e) => setNewKeyQuota(parseInt(e.target.value) || 5000)}
+                          min={1000}
+                          max={100000}
+                        />
+                      </div>
+                      <Button 
+                        onClick={createApiKey} 
+                        disabled={creating || !newKeyName.trim()}
+                        className="w-full"
                       >
-                        <Copy className="w-4 h-4" />
+                        {creating ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4 mr-2" />
+                        )}
+                        Create API Key
                       </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowNewKey("")}
-                      className="mt-2"
-                    >
-                      I&apos;ve saved this key
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {showNewKey && (
+                <div className="rounded-lg border border-border/50 p-3 bg-muted/40">
+                  <p className="text-xs text-muted-foreground mb-2">
+                    New API key created. Copy and store it securely.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-background px-3 py-2 rounded border border-border/50 text-xs overflow-x-auto">
+                      {showNewKey}
+                    </code>
+                    <Button size="sm" variant="outline" onClick={() => copyToClipboard(showNewKey)} className="rounded-full px-3">
+                      <Copy className="w-4 h-4" />
                     </Button>
                   </div>
-                )}
-                
-                {apiKeys.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Key className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No API keys yet</p>
-                    <p className="text-sm text-muted-foreground">
-                      Create your first API key to start using the TruMailer API v2
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {apiKeys.map((key) => (
-                      <div key={key.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium">{key.name}</h4>
-                            <Badge variant={key.isActive ? "default" : "secondary"}>
-                              {key.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <code className="bg-muted px-2 py-1 rounded">
-                              {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
-                            </code>
-                            <span>{key.currentUsage}/{key.monthlyQuota} requests</span>
-                            <span>Created {new Date(key.createdAt).toLocaleDateString()}</span>
-                            {!visibleKeys.has(key.id) && (
-                              <span className="text-xs text-orange-600">Key hidden for security</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => toggleKeyVisibility(key.id)}
-                          >
-                            {visibleKeys.has(key.id) ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => copyToClipboard(key.keyPreview)}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteApiKey(key.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  <Button size="sm" variant="ghost" onClick={() => setShowNewKey("")} className="mt-2 text-muted-foreground">
+                    Dismiss
+                  </Button>
+                </div>
+              )}
 
-            {/* Analytics */}
+              {apiKeys.length === 0 ? (
+                <div className="rounded-xl border border-border/50 p-6 text-center">
+                  <p className="text-sm text-muted-foreground">No API keys yet</p>
+                  <p className="text-xs text-muted-foreground">Create your first API key to start.</p>
+                </div>
+              ) : (
+                <ul className="rounded-xl border border-border/50 overflow-hidden">
+                  {apiKeys.map((key) => (
+                    <li key={key.id} className="p-4 border-b last:border-b-0 border-border/50 flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium truncate max-w-[220px]">{key.name}</h4>
+                          <Badge variant={key.isActive ? "default" : "secondary"}>
+                            {key.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                          <code className="bg-muted/50 px-2 py-1 rounded">
+                            {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
+                          </code>
+                          <span>{key.currentUsage}/{key.monthlyQuota} requests</span>
+                          <span>Created {new Date(key.createdAt).toLocaleDateString()}</span>
+                          {!visibleKeys.has(key.id) && (
+                            <span className="text-[11px] text-muted-foreground/80">Hidden for security</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 ml-3">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => toggleKeyVisibility(key.id)}
+                          aria-label={visibleKeys.has(key.id) ? 'Hide key' : 'Show key'}
+                        >
+                          {visibleKeys.has(key.id) ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => copyToClipboard(key.keyPreview)}
+                          aria-label="Copy key"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-red-500 hover:text-red-500"
+                          onClick={() => deleteApiKey(key.id)}
+                          aria-label="Delete key"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Analytics - minimal */}
             {apiStats && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5" />
-                    Usage Analytics
-                  </CardTitle>
-                  <CardDescription>
-                    Your API usage statistics for this month
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 md:grid-cols-2">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Total Requests</span>
-                        <span className="text-2xl font-bold">{apiStats.totalRequests}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Successful</span>
-                        <span className="text-lg font-semibold text-green-600">{apiStats.successfulRequests}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Failed</span>
-                        <span className="text-lg font-semibold text-red-600">{apiStats.errorRequests}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Average Response Time</span>
-                        <span className="text-lg font-semibold">{apiStats.averageResponseTime}ms</span>
-                      </div>
+              <section aria-labelledby="analytics" className="space-y-3">
+                <h3 id="analytics" className="text-base font-semibold flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-muted-foreground" />
+                  Usage Analytics
+                </h3>
+                <div className="rounded-xl border border-border/50 overflow-hidden">
+                  <div className="grid grid-cols-2 md:grid-cols-4">
+                    <div className="p-4">
+                      <div className="text-xs text-muted-foreground">Total Requests</div>
+                      <div className="text-lg font-semibold">{apiStats.totalRequests}</div>
                     </div>
-                    
-                    <div>
-                      <h4 className="text-sm font-medium mb-3">Top Endpoints</h4>
-                      <div className="space-y-2">
-                        {(apiStats.endpointUsage || apiStats.topEndpoints || []).slice(0, 5).map((endpoint, index) => {
-                          // Handle both endpointUsage and topEndpoints formats
-                          const count = 'count' in endpoint ? endpoint.count : 'requests' in endpoint ? endpoint.requests : 0;
-                          return (
-                            <div key={endpoint.endpoint} className="flex items-center justify-between">
-                              <code className="text-xs bg-muted px-2 py-1 rounded">{endpoint.endpoint}</code>
-                              <span className="text-sm font-medium">{count}</span>
-                            </div>
-                          );
-                        })}
-                        {(!apiStats.endpointUsage && !apiStats.topEndpoints) && (
-                          <p className="text-sm text-muted-foreground">No endpoint data available</p>
-                        )}
-                      </div>
+                    <div className="p-4 border-t md:border-t-0 md:border-l border-border/50">
+                      <div className="text-xs text-muted-foreground">Successful</div>
+                      <div className="text-lg font-semibold text-green-500">{apiStats.successfulRequests}</div>
+                    </div>
+                    <div className="p-4 border-t md:border-l border-border/50">
+                      <div className="text-xs text-muted-foreground">Failed</div>
+                      <div className="text-lg font-semibold text-red-500">{apiStats.errorRequests}</div>
+                    </div>
+                    <div className="p-4 border-t md:border-l border-border/50">
+                      <div className="text-xs text-muted-foreground">Avg Response</div>
+                      <div className="text-lg font-semibold">{apiStats.averageResponseTime}ms</div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="p-4 border-t border-border/50">
+                    <h4 className="text-sm font-medium mb-3">Top Endpoints</h4>
+                    <div className="space-y-2">
+                      {(apiStats.endpointUsage || apiStats.topEndpoints || []).slice(0, 5).map((endpoint) => {
+                        const count = 'count' in endpoint ? endpoint.count : 'requests' in endpoint ? endpoint.requests : 0;
+                        return (
+                          <div key={endpoint.endpoint} className="flex items-center justify-between text-sm">
+                            <code className="text-xs bg-muted/50 px-2 py-1 rounded">{endpoint.endpoint}</code>
+                            <span className="font-medium">{count}</span>
+                          </div>
+                        );
+                      })}
+                      {(!apiStats.endpointUsage && !apiStats.topEndpoints) && (
+                        <p className="text-sm text-muted-foreground">No endpoint data available</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
             )}
             </TabsContent>
 

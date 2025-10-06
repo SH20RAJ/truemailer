@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardClient } from "@/components/dashboard/dashboard-client";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: 'API Dashboard - Manage Keys & Analytics',
@@ -26,9 +26,5 @@ export const metadata: Metadata = {
 };
 
 export default function Dashboard() {
-  return (
-    <>
-      <DashboardClient />
-    </>
-  );
+  redirect("/dashboard/overview");
 }
