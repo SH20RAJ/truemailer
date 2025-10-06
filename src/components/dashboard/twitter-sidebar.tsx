@@ -79,7 +79,7 @@ export function TwitterSidebar() {
 
         <div className="px-2 mt-2">
           <Button asChild className="w-full h-12 text-base font-semibold">
-            <Link href="/dashboard?tab=playground" prefetch={false}>
+            <Link href="/dashboard/playground" prefetch={false}>
               New Validation
             </Link>
           </Button>
