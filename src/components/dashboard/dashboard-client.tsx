@@ -72,7 +72,7 @@ interface PlaygroundResult {
   };
 }
 
-type Section = "overview" | "playground" | "personal-lists" | "docs";
+type Section = "overview" | "keys" | "playground" | "personal-lists" | "docs";
 
 export function DashboardClient({ section }: { section?: Section } = {}) {
   const user = useUser();
@@ -262,7 +262,8 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
 
   // Page header details per section
   const header = {
-    overview: { title: "Overview", desc: "Usage analytics and API keys at a glance.", icon: Key },
+    overview: { title: "Overview", desc: "Usage analytics and key highlights.", icon: BarChart3 },
+    keys: { title: "API Keys", desc: "Create and manage your API keys.", icon: Key },
     playground: { title: "Playground", desc: "Test email validation with your API key.", icon: Code },
     "personal-lists": { title: "Personal Lists", desc: "Manage your blocklist and whitelist.", icon: ShieldCheck },
     docs: { title: "Documentation", desc: "Integrate the TruMailer API v2 in minutes.", icon: BookOpen },
@@ -306,8 +307,9 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
             className="space-y-6"
           >
             {!section && (
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="keys">API Keys</TabsTrigger>
                 <TabsTrigger value="playground">Playground</TabsTrigger>
                 <TabsTrigger value="personal-lists">Personal Lists</TabsTrigger>
                 <TabsTrigger value="docs">Documentation</TabsTrigger>
@@ -350,146 +352,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
               </div>
             </div>
 
-            {/* API Keys - minimal */}
-            <section aria-labelledby="keys" className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 id="keys" className="text-base font-semibold">API Keys</h3>
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" className="rounded-full px-4">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create Key
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Create New API Key</DialogTitle>
-                      <DialogDescription>
-                        Create a new API key to access the TruMailer API v2
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="keyName">Key Name</Label>
-                        <Input
-                          id="keyName"
-                          value={newKeyName}
-                          onChange={(e) => setNewKeyName(e.target.value)}
-                          placeholder="e.g. Production API Key"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="keyQuota">Monthly Quota</Label>
-                        <Input
-                          id="keyQuota"
-                          type="number"
-                          value={newKeyQuota}
-                          onChange={(e) => setNewKeyQuota(parseInt(e.target.value) || 5000)}
-                          min={1000}
-                          max={100000}
-                        />
-                      </div>
-                      <Button 
-                        onClick={createApiKey} 
-                        disabled={creating || !newKeyName.trim()}
-                        className="w-full"
-                      >
-                        {creating ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <Plus className="w-4 h-4 mr-2" />
-                        )}
-                        Create API Key
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              {showNewKey && (
-                <div className="rounded-lg border border-border/50 p-3 bg-muted/40">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    New API key created. Copy and store it securely.
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 bg-background px-3 py-2 rounded border border-border/50 text-xs overflow-x-auto">
-                      {showNewKey}
-                    </code>
-                    <Button size="sm" variant="outline" onClick={() => copyToClipboard(showNewKey)} className="rounded-full px-3">
-                      <Copy className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <Button size="sm" variant="ghost" onClick={() => setShowNewKey("")} className="mt-2 text-muted-foreground">
-                    Dismiss
-                  </Button>
-                </div>
-              )}
-
-              {apiKeys.length === 0 ? (
-                <div className="rounded-xl border border-border/50 p-6 text-center">
-                  <p className="text-sm text-muted-foreground">No API keys yet</p>
-                  <p className="text-xs text-muted-foreground">Create your first API key to start.</p>
-                </div>
-              ) : (
-                <ul className="rounded-xl border border-border/50 overflow-hidden">
-                  {apiKeys.map((key) => (
-                    <li key={key.id} className="p-4 border-b last:border-b-0 border-border/50 flex items-center justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium truncate max-w-[220px]">{key.name}</h4>
-                          <Badge variant={key.isActive ? "default" : "secondary"}>
-                            {key.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <code className="bg-muted/50 px-2 py-1 rounded">
-                            {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
-                          </code>
-                          <span>{key.currentUsage}/{key.monthlyQuota} requests</span>
-                          <span>Created {new Date(key.createdAt).toLocaleDateString()}</span>
-                          {!visibleKeys.has(key.id) && (
-                            <span className="text-[11px] text-muted-foreground/80">Hidden for security</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 ml-3">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={() => toggleKeyVisibility(key.id)}
-                          aria-label={visibleKeys.has(key.id) ? 'Hide key' : 'Show key'}
-                        >
-                          {visibleKeys.has(key.id) ? (
-                            <EyeOff className="w-4 h-4" />
-                          ) : (
-                            <Eye className="w-4 h-4" />
-                          )}
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={() => copyToClipboard(key.keyPreview)}
-                          aria-label="Copy key"
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-red-500 hover:text-red-500"
-                          onClick={() => deleteApiKey(key.id)}
-                          aria-label="Delete key"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            {/* (Moved) API Keys section is now rendered in a dedicated tab below */}
 
             {/* Analytics - minimal */}
             {apiStats && (
@@ -579,6 +442,149 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                 </div>
               </section>
             )}
+            </TabsContent>
+
+            {/* API Keys Tab */}
+            <TabsContent value="keys" className="space-y-6">
+              <section aria-labelledby="keys" className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 id="keys" className="text-base font-semibold">API Keys</h3>
+                  <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button size="sm" className="rounded-full px-4">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Key
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create New API Key</DialogTitle>
+                        <DialogDescription>
+                          Create a new API key to access the TruMailer API v2
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="keyName">Key Name</Label>
+                          <Input
+                            id="keyName"
+                            value={newKeyName}
+                            onChange={(e) => setNewKeyName(e.target.value)}
+                            placeholder="e.g. Production API Key"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="keyQuota">Monthly Quota</Label>
+                          <Input
+                            id="keyQuota"
+                            type="number"
+                            value={newKeyQuota}
+                            onChange={(e) => setNewKeyQuota(parseInt(e.target.value) || 5000)}
+                            min={1000}
+                            max={100000}
+                          />
+                        </div>
+                        <Button 
+                          onClick={createApiKey} 
+                          disabled={creating || !newKeyName.trim()}
+                          className="w-full"
+                        >
+                          {creating ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="w-4 h-4 mr-2" />
+                          )}
+                          Create API Key
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {showNewKey && (
+                  <div className="rounded-lg border border-border/50 p-3 bg-muted/40">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      New API key created. Copy and store it securely.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 bg-background px-3 py-2 rounded border border-border/50 text-xs overflow-x-auto">
+                        {showNewKey}
+                      </code>
+                      <Button size="sm" variant="outline" onClick={() => copyToClipboard(showNewKey)} className="rounded-full px-3">
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => setShowNewKey("")} className="mt-2 text-muted-foreground">
+                      Dismiss
+                    </Button>
+                  </div>
+                )}
+
+                {apiKeys.length === 0 ? (
+                  <div className="rounded-xl border border-border/50 p-6 text-center">
+                    <p className="text-sm text-muted-foreground">No API keys yet</p>
+                    <p className="text-xs text-muted-foreground">Create your first API key to start.</p>
+                  </div>
+                ) : (
+                  <ul className="rounded-xl border border-border/50 overflow-hidden">
+                    {apiKeys.map((key) => (
+                      <li key={key.id} className="p-4 border-b last:border-b-0 border-border/50 flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium truncate max-w-[220px]">{key.name}</h4>
+                            <Badge variant={key.isActive ? "default" : "secondary"}>
+                              {key.isActive ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                            <code className="bg-muted/50 px-2 py-1 rounded">
+                              {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
+                            </code>
+                            <span>{key.currentUsage}/{key.monthlyQuota} requests</span>
+                            <span>Created {new Date(key.createdAt).toLocaleDateString()}</span>
+                            {!visibleKeys.has(key.id) && (
+                              <span className="text-[11px] text-muted-foreground/80">Hidden for security</span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 ml-3">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => toggleKeyVisibility(key.id)}
+                            aria-label={visibleKeys.has(key.id) ? 'Hide key' : 'Show key'}
+                          >
+                            {visibleKeys.has(key.id) ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => copyToClipboard(key.keyPreview)}
+                            aria-label="Copy key"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-red-500 hover:text-red-500"
+                            onClick={() => deleteApiKey(key.id)}
+                            aria-label="Delete key"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
             </TabsContent>
 
             {/* Playground Tab */}
