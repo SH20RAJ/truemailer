@@ -593,7 +593,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Play className="w-5 h-5" />
-                    API Playground
+                    Validation Playground
                   </CardTitle>
                   <CardDescription>
                     Test your API keys with live email validation
@@ -628,12 +628,45 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                     ) : (
                       <Play className="w-4 h-4 mr-2" />
                     )}
-                    Test API
+                    Validate
                   </Button>
+                  <div className="text-xs text-muted-foreground">We never store your API key.</div>
 
                   {playgroundResult && (
                     <div className="mt-6">
                       <h4 className="text-sm font-medium mb-3">Validation Results</h4>
+                      {/* Summary badges */}
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <Badge variant={playgroundResult.valid ? 'default' : 'destructive'}>
+                          {playgroundResult.valid ? 'Valid' : 'Invalid'}
+                        </Badge>
+                        <Badge variant={playgroundResult.syntax_valid ? 'secondary' : 'destructive'}>
+                          Syntax {playgroundResult.syntax_valid ? 'OK' : 'Error'}
+                        </Badge>
+                        {typeof playgroundResult.disposable === 'boolean' && (
+                          <Badge variant={playgroundResult.disposable ? 'destructive' : 'secondary'}>
+                            {playgroundResult.disposable ? 'Disposable' : 'Not disposable'}
+                          </Badge>
+                        )}
+                        {typeof playgroundResult.mx_records === 'boolean' && (
+                          <Badge variant={playgroundResult.mx_records ? 'default' : 'secondary'}>
+                            MX {playgroundResult.mx_records ? 'present' : 'missing'}
+                          </Badge>
+                        )}
+                        {typeof playgroundResult.role_based === 'boolean' && (
+                          <Badge variant={playgroundResult.role_based ? 'secondary' : 'default'}>
+                            {playgroundResult.role_based ? 'Role-based' : 'Personal'}
+                          </Badge>
+                        )}
+                        {playgroundResult.risk_level && (
+                          <Badge variant={playgroundResult.risk_level === 'low' ? 'default' : playgroundResult.risk_level === 'medium' ? 'secondary' : 'destructive'}>
+                            {playgroundResult.risk_level}
+                          </Badge>
+                        )}
+                        {typeof playgroundResult.confidence_score === 'number' && (
+                          <Badge variant="outline">{Math.round(playgroundResult.confidence_score * 100)}% confidence</Badge>
+                        )}
+                      </div>
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
@@ -733,7 +766,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                           
                           <div>
                             <h5 className="text-sm font-medium mb-2">Raw Response</h5>
-                            <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-40">
+                            <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-60">
                               {JSON.stringify(playgroundResult, null, 2)}
                             </pre>
                           </div>
