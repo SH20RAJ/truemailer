@@ -39,12 +39,25 @@ interface ApiStats {
 
 interface PlaygroundResult {
   email: string;
+  domain?: string;
   valid: boolean;
   syntax_valid: boolean;
   disposable: boolean | null;
   role_based: boolean | null;
   mx_records: boolean | null;
+  spammy?: boolean;
+  allowed_list?: boolean;
+  confidence_score?: number;
+  risk_level?: 'low' | 'medium' | 'high';
+  suggestions?: string[];
+  personal_override?: boolean;
   reason: string;
+  timestamp?: string;
+  cache_info?: {
+    disposable_domains_count: number;
+    allowed_domains_count: number;
+    last_updated: string;
+  };
 }
 
 export function DashboardClient() {
@@ -565,9 +578,9 @@ export function DashboardClient() {
 
                   {playgroundResult && (
                     <div className="mt-6">
-                      <h4 className="text-sm font-medium mb-3">Response</h4>
+                      <h4 className="text-sm font-medium mb-3">Validation Results</h4>
                       <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
+                        <div className="space-y-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm">Valid:</span>
                             <Badge variant={playgroundResult.valid ? "default" : "destructive"}>
@@ -592,12 +605,83 @@ export function DashboardClient() {
                               {playgroundResult.role_based === null ? "Unknown" : playgroundResult.role_based ? "Yes" : "No"}
                             </Badge>
                           </div>
+                          {playgroundResult.spammy !== undefined && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Spammy:</span>
+                              <Badge variant={playgroundResult.spammy ? "destructive" : "default"}>
+                                {playgroundResult.spammy ? "Yes" : "No"}
+                              </Badge>
+                            </div>
+                          )}
+                          {playgroundResult.allowed_list !== undefined && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Allowed List:</span>
+                              <Badge variant={playgroundResult.allowed_list ? "default" : "secondary"}>
+                                {playgroundResult.allowed_list ? "Yes" : "No"}
+                              </Badge>
+                            </div>
+                          )}
+                          {playgroundResult.confidence_score !== undefined && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Confidence Score:</span>
+                              <Badge variant={playgroundResult.confidence_score > 0.7 ? "default" : playgroundResult.confidence_score > 0.4 ? "secondary" : "destructive"}>
+                                {(playgroundResult.confidence_score * 100).toFixed(0)}%
+                              </Badge>
+                            </div>
+                          )}
+                          {playgroundResult.risk_level && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Risk Level:</span>
+                              <Badge variant={playgroundResult.risk_level === 'low' ? "default" : playgroundResult.risk_level === 'medium' ? "secondary" : "destructive"}>
+                                {playgroundResult.risk_level.charAt(0).toUpperCase() + playgroundResult.risk_level.slice(1)}
+                              </Badge>
+                            </div>
+                          )}
+                          {playgroundResult.personal_override && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">Personal Override:</span>
+                              <Badge variant="outline">
+                                Active
+                              </Badge>
+                            </div>
+                          )}
                         </div>
-                        <div>
-                          <h5 className="text-sm font-medium mb-2">Raw Response</h5>
-                          <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-40">
-                            {JSON.stringify(playgroundResult, null, 2)}
-                          </pre>
+                        <div className="space-y-3">
+                          <div>
+                            <h5 className="text-sm font-medium mb-2">Reason</h5>
+                            <p className="text-xs bg-muted p-2 rounded">{playgroundResult.reason}</p>
+                          </div>
+                          
+                          {playgroundResult.suggestions && playgroundResult.suggestions.length > 0 && (
+                            <div>
+                              <h5 className="text-sm font-medium mb-2">Suggestions</h5>
+                              <div className="space-y-1">
+                                {playgroundResult.suggestions.map((suggestion, index) => (
+                                  <p key={index} className="text-xs bg-muted p-2 rounded">
+                                    • {suggestion}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {playgroundResult.cache_info && (
+                            <div>
+                              <h5 className="text-sm font-medium mb-2">Cache Info</h5>
+                              <div className="text-xs bg-muted p-2 rounded space-y-1">
+                                <p>Disposable domains: {playgroundResult.cache_info.disposable_domains_count.toLocaleString()}</p>
+                                <p>Allowed domains: {playgroundResult.cache_info.allowed_domains_count.toLocaleString()}</p>
+                                <p>Last updated: {new Date(playgroundResult.cache_info.last_updated).toLocaleString()}</p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div>
+                            <h5 className="text-sm font-medium mb-2">Raw Response</h5>
+                            <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-40">
+                              {JSON.stringify(playgroundResult, null, 2)}
+                            </pre>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -668,16 +752,31 @@ export function DashboardClient() {
                       </pre>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium mb-2">Response</h4>
-                      <pre className="text-xs bg-muted p-3 rounded">
+                      <h4 className="text-sm font-medium mb-2">Enhanced Response</h4>
+                      <pre className="text-xs bg-muted p-3 rounded overflow-auto">
 {`{
   "email": "xepeg24004@merumart.com",
-  "valid": true,
+  "domain": "merumart.com",
+  "valid": false,
   "syntax_valid": true,
-  "disposable": false,
+  "disposable": true,
   "role_based": false,
   "mx_records": true,
-  "reason": "Valid email"
+  "spammy": true,
+  "allowed_list": false,
+  "confidence_score": 0.1,
+  "risk_level": "high",
+  "suggestions": [
+    "This domain is known for providing temporary/disposable email addresses"
+  ],
+  "personal_override": false,
+  "reason": "Disposable email detected",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "cache_info": {
+    "disposable_domains_count": 12847,
+    "allowed_domains_count": 156,
+    "last_updated": "2024-01-15T08:00:00.000Z"
+  }
 }`}
                       </pre>
                     </div>
