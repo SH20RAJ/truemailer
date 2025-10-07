@@ -13,6 +13,7 @@ import {
   Calendar, Mail, User, Shield, Clock, Key, BarChart3, 
   Plus, Copy, Eye, EyeOff, Trash2, Loader2, Code, BookOpen, Play, ShieldCheck
 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ResponsiveContainer,
   LineChart,
@@ -292,15 +293,16 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
         ) : (
           <Tabs
             value={activeTab}
-            onValueChange={(val: Section) => {
-              setActiveTab(val);
+            onValueChange={(val: string) => {
+              const v = (val as Section);
+              setActiveTab(v);
               // If on dedicated section page, navigate to the route;
               // otherwise, keep query param for backward compatibility.
               if (pathname?.startsWith("/dashboard/")) {
-                router.replace(`/dashboard/${val}`, { scroll: false });
+                router.replace(`/dashboard/${v}`, { scroll: false });
               } else {
                 const params = new URLSearchParams(searchParams ?? undefined);
-                params.set("tab", val);
+                params.set("tab", v);
                 router.replace(`${pathname}?${params.toString()}`, { scroll: false });
               }
             }}
@@ -526,63 +528,78 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                     <p className="text-xs text-muted-foreground">Create your first API key to start.</p>
                   </div>
                 ) : (
-                  <ul className="rounded-xl border border-border/50 overflow-hidden">
-                    {apiKeys.map((key) => (
-                      <li key={key.id} className="p-4 border-b last:border-b-0 border-border/50 flex items-center justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-medium truncate max-w-[220px]">{key.name}</h4>
-                            <Badge variant={key.isActive ? "default" : "secondary"}>
-                              {key.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                            <code className="bg-muted/50 px-2 py-1 rounded">
-                              {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
-                            </code>
-                            <span>{key.currentUsage}/{key.monthlyQuota} requests</span>
-                            <span>Created {new Date(key.createdAt).toLocaleDateString()}</span>
-                            {!visibleKeys.has(key.id) && (
-                              <span className="text-[11px] text-muted-foreground/80">Hidden for security</span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1 ml-3">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={() => toggleKeyVisibility(key.id)}
-                            aria-label={visibleKeys.has(key.id) ? 'Hide key' : 'Show key'}
-                          >
-                            {visibleKeys.has(key.id) ? (
-                              <EyeOff className="w-4 h-4" />
-                            ) : (
-                              <Eye className="w-4 h-4" />
-                            )}
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={() => copyToClipboard(key.keyPreview)}
-                            aria-label="Copy key"
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-red-500 hover:text-red-500"
-                            onClick={() => deleteApiKey(key.id)}
-                            aria-label="Delete key"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="rounded-xl border border-border/50 overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Name</TableHead>
+                          <TableHead>Key</TableHead>
+                          <TableHead>Usage</TableHead>
+                          <TableHead>Created</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {apiKeys.map((key) => (
+                          <TableRow key={key.id}>
+                            <TableCell className="max-w-[220px] truncate font-medium">{key.name}</TableCell>
+                            <TableCell>
+                              <code className="bg-muted/50 px-2 py-1 rounded text-xs">
+                                {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
+                              </code>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {key.currentUsage}/{key.monthlyQuota}
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {new Date(key.createdAt).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={key.isActive ? "default" : "secondary"}>
+                                {key.isActive ? "Active" : "Inactive"}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8"
+                                  onClick={() => toggleKeyVisibility(key.id)}
+                                  aria-label={visibleKeys.has(key.id) ? 'Hide key' : 'Show key'}
+                                >
+                                  {visibleKeys.has(key.id) ? (
+                                    <EyeOff className="w-4 h-4" />
+                                  ) : (
+                                    <Eye className="w-4 h-4" />
+                                  )}
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8"
+                                  onClick={() => copyToClipboard(key.keyPreview)}
+                                  aria-label="Copy key"
+                                >
+                                  <Copy className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8 text-red-500 hover:text-red-500"
+                                  onClick={() => deleteApiKey(key.id)}
+                                  aria-label="Delete key"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 )}
               </section>
             </TabsContent>

@@ -32,6 +32,8 @@ export function TwitterSidebar() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const tab = searchParams.get("tab")
+  const userEmail: string = (user as any)?.email || (user as any)?.emails?.[0]?.email || ""
+  const initial: string = (user?.displayName?.[0] || userEmail?.[0] || "U").toUpperCase()
 
   const items: NavItem[] = useMemo(
     () => [
@@ -81,14 +83,6 @@ export function TwitterSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* <div className="px-2 mt-2">
-          <Button asChild className="w-full h-12 text-base font-semibold">
-            <Link href="/dashboard/playground" prefetch={false}>
-              New Validation
-            </Link>
-          </Button>
-        </div> */}
-
         <SidebarSeparator className="my-3" />
       </SidebarContent>
       <SidebarFooter>
@@ -97,12 +91,12 @@ export function TwitterSidebar() {
             {/* If your auth provides an image URL, set it here */}
             <AvatarImage src={(user as any)?.photoURL || (user as any)?.imageUrl || undefined} alt={user?.displayName ?? "User"} />
             <AvatarFallback>
-              {(user?.displayName?.[0] || user?.emails?.[0]?.email?.[0] || "U").toUpperCase()}
+              {initial}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 group-data-[collapsible=icon]/sidebar:hidden">
             <div className="text-sm font-medium truncate">{user?.displayName || "User"}</div>
-            <div className="text-xs text-muted-foreground truncate">{(user as any)?.email || (user as any)?.emails?.[0]?.email || ""}</div>
+            <div className="text-xs text-muted-foreground truncate">{userEmail}</div>
           </div>
         </div>
       </SidebarFooter>
