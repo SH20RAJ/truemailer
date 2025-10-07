@@ -103,6 +103,37 @@
     background-clip: text;
     color: transparent;
   }
+
+  /* Micro-interaction helpers */
+  .pressable {
+    transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease, color 140ms ease;
+  }
+  .pressable:active {
+    transform: translateY(1px) scale(0.99);
+  }
+  .hover-lift {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .hover-lift:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  }
+  .hover-slide-x {
+    transition: transform 140ms ease;
+  }
+  .hover-slide-x:hover {
+    transform: translateX(2px);
+  }
+  .focus-ring-smooth {
+    transition: box-shadow 140ms ease, outline-color 140ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pressable, .hover-lift, .hover-slide-x, .focus-ring-smooth, * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
 }
 
 /* P
