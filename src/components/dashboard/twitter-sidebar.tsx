@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +15,6 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
 import { Home, Key, Play, ListTodo, BookOpen, Feather } from "lucide-react"
 import { useMemo } from "react"
 import { useUser } from "@stackframe/stack"
@@ -30,10 +29,12 @@ type NavItem = {
 export function TwitterSidebar() {
   const user = useUser()
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const tab = searchParams.get("tab")
-  const userEmail: string = (user as any)?.email || (user as any)?.emails?.[0]?.email || ""
-  const initial: string = (user?.displayName?.[0] || userEmail?.[0] || "U").toUpperCase()
+  type MaybeUser = { displayName?: string | null }
+  type MaybeContact = { email?: string | null }
+  type MaybeImage = { photoURL?: string | null; imageUrl?: string | null }
+  const u = user as unknown as MaybeUser & MaybeContact & MaybeImage
+  const userEmail: string = u?.email ?? ""
+  const initial: string = (u?.displayName?.[0] || userEmail?.[0] || "U").toUpperCase()
 
   const items: NavItem[] = useMemo(
     () => [
@@ -89,7 +90,7 @@ export function TwitterSidebar() {
         <div className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-sidebar-accent transition-colors">
           <Avatar className="h-8 w-8">
             {/* If your auth provides an image URL, set it here */}
-            <AvatarImage src={(user as any)?.photoURL || (user as any)?.imageUrl || undefined} alt={user?.displayName ?? "User"} />
+            <AvatarImage src={u?.photoURL ?? u?.imageUrl ?? undefined} alt={u?.displayName ?? "User"} />
             <AvatarFallback>
               {initial}
             </AvatarFallback>

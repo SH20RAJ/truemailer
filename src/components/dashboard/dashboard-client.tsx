@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthButtons } from "@/components/auth-buttons";
 import { 
-  Calendar, Mail, User, Shield, Clock, Key, BarChart3, 
+  User, Clock, Key, BarChart3,
   Plus, Copy, Eye, EyeOff, Trash2, Loader2, Code, BookOpen, Play, ShieldCheck
 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -105,7 +105,6 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
     }
     const q = (searchParams?.get("tab") as Section | null) || "overview";
     setActiveTab(q);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section, searchParams]);
 
   // Auto-sync user on page load
@@ -639,7 +638,13 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                     </div>
                   </div>
                   
-                  <Button onClick={testPlaygroundApi} disabled={playgroundLoading} className="w-full">
+                  <Button
+                    onClick={testPlaygroundApi}
+                    disabled={playgroundLoading}
+                    className="w-full"
+                    aria-controls="playground-result"
+                    aria-busy={playgroundLoading}
+                  >
                     {playgroundLoading ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
@@ -650,7 +655,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                   <div className="text-xs text-muted-foreground">We never store your API key.</div>
 
                   {playgroundResult && (
-                    <div className="mt-6">
+                    <div className="mt-6" id="playground-result" role="region" aria-live="polite">
                       <h4 className="text-sm font-medium mb-3">Validation Results</h4>
                       {/* Summary badges */}
                       <div className="flex flex-wrap items-center gap-2 mb-3">
