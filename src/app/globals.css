@@ -42,10 +42,10 @@
   --color-input: #333333;
 
   /* Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  --radius-sm: 0;
+  --radius-md: 0rem;
+  --radius-lg: 0rem;
+  --radius-xl: 0rem;
 }
 
 /* Base styles */
@@ -75,7 +75,7 @@
     /* General surfaces in dashboard area */
     --color-background: #000000;
     --color-foreground: #e6e9ef;
-    --color-card: #0a0a0a;
+    --color-card: #4594cd;
     --color-card-foreground: #e6e9ef;
     --color-muted: #0a0f14;
     --color-muted-foreground: #9aa4ae;
