@@ -1,5 +1,3 @@
-"use client"
-
 import {
   SidebarInset,
   SidebarProvider,
@@ -7,6 +5,11 @@ import {
 } from "@/components/ui/sidebar"
 import TwitterSidebar from "@/components/dashboard/twitter-sidebar"
 import { ReactNode } from "react"
+
+export const metadata : { title: string; description: string } = {
+  title: 'Dashboard',
+  description: 'Dashboard layout with sidebar navigation',
+}
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
