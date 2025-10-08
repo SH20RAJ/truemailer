@@ -42,9 +42,9 @@ export default function StandalonePlaygroundClient() {
     setLoading(true); setError(""); setResult(null);
     try {
       const response = await fetch(`/api/validate?email=${encodeURIComponent(value)}`);
-      const data = await response.json() as ValidationResult;
-      if (!response.ok) throw new Error((data as any)?.error || 'Validation failed');
-      setResult(data); saveToHistory(data);
+      const data = await response.json() as ValidationResult | { error?: string };
+      if (!response.ok) throw new Error(("error" in data && data.error) || 'Validation failed');
+      setResult(data as ValidationResult); saveToHistory(data as ValidationResult);
     } catch (err) { setError(err instanceof Error ? err.message : 'An error occurred'); }
     finally { setLoading(false); }
   };
@@ -55,9 +55,9 @@ export default function StandalonePlaygroundClient() {
     if (emails.length > 100) { setError('Maximum 100 emails allowed per batch'); setLoading(false); return; }
     try {
       const response = await fetch('/api/validate-batch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ emails }) });
-      const data = await response.json() as BatchResult;
-      if (!response.ok) throw new Error((data as any).error || 'Batch validation failed');
-      setBatchResult(data);
+      const data = await response.json() as BatchResult | { error?: string };
+      if (!response.ok) throw new Error(("error" in data && data.error) || 'Batch validation failed');
+      setBatchResult(data as BatchResult);
     } catch (err) { setError(err instanceof Error ? err.message : 'An error occurred'); }
     finally { setLoading(false); }
   };
@@ -162,4 +162,3 @@ export default function StandalonePlaygroundClient() {
     </div>
   );
 }
-

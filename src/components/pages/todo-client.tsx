@@ -177,10 +177,10 @@ export default function TodoClient() {
         <Card className="mt-6">
           <CardHeader><CardTitle>CRUD Operations</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <p><strong>Create:</strong> Enter content and click "Add"</p>
+            <p><strong>Create:</strong> Enter content and click &quot;Add&quot;</p>
             <p><strong>Read:</strong> Todos are displayed with their database ID</p>
-            <p><strong>Update:</strong> Click "Edit" then "Save"</p>
-            <p><strong>Delete:</strong> Click "Delete" to remove a todo</p>
+            <p><strong>Update:</strong> Click &quot;Edit&quot; then &quot;Save&quot;</p>
+            <p><strong>Delete:</strong> Click &quot;Delete&quot; to remove a todo</p>
             <p className="text-muted-foreground mt-3">All operations use Cloudflare D1 + Drizzle ORM</p>
           </CardContent>
         </Card>
@@ -188,4 +188,3 @@ export default function TodoClient() {
     </div>
   );
 }
-

@@ -1,5 +1,8 @@
 # TruMailer
 
+[![CI](https://github.com/sh20raj/trumailer/actions/workflows/ci.yml/badge.svg)](https://github.com/sh20raj/trumailer/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 TruMailer is a lightweight and fast **email validation API** built to help developers check whether an email address is valid, disposable, role-based, or spammy.  
 It’s simple to use, easy to deploy, and designed for speed.
 
@@ -89,11 +92,10 @@ GET /validate?email=example@gmail.com
 
 ## 🤝 Contributing
 
-Pull requests are welcome!
-For major changes, open an issue first to discuss what you’d like to change.
+We welcome contributions of all kinds! Please read CONTRIBUTING.md for how to set up your dev environment, coding guidelines, and the PR process. By participating, you agree to abide by the CODE_OF_CONDUCT.md.
 
 ---
 
 ## 📄 License
 
-MIT © 2025 TruMailer
+This project is licensed under the MIT License — see LICENSE for details.

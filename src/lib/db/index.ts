@@ -1,5 +1,6 @@
 import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+// Use the web/edge build of libsql client for Cloudflare Workers
+import { createClient } from '@libsql/client/web';
 import { eq, and, gte, sql } from 'drizzle-orm';
 import { 
   usersTable, 
