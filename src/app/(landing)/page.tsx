@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://truemailer.30tools.com',
+    url: 'https://truemailer.strivio.world',
     title: 'TrueMailer - Professional Email Validation API',
     description: 'Professional email validation API with real-time disposable email detection. Validate emails, detect spam domains, and ensure email deliverability with 99.9% accuracy.',
     siteName: 'TrueMailer',

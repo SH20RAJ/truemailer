@@ -245,7 +245,7 @@ export function TestAPIClient() {
                             <div>
                                 <h3 className="text-lg font-semibold mb-3">cURL Request</h3>
                                 <CodeBlock 
-                                    code={`curl "https://truemailer.30tools.com/api/validate?email=test@example.com"`}
+                                    code={`curl "https://truemailer.strivio.world/api/validate?email=test@example.com"`}
                                     language="bash"
                                 />
                             </div>
@@ -253,7 +253,7 @@ export function TestAPIClient() {
                             <div>
                                 <h3 className="text-lg font-semibold mb-3">JavaScript (Fetch)</h3>
                                 <CodeBlock 
-                                    code={`const response = await fetch('https://truemailer.30tools.com/api/validate?email=test@example.com');
+                                    code={`const response = await fetch('https://truemailer.strivio.world/api/validate?email=test@example.com');
 const data = await response.json();
 console.log(data);`}
                                     language="javascript"
@@ -265,7 +265,7 @@ console.log(data);`}
                                 <CodeBlock 
                                     code={`import requests
 
-response = requests.get('https://truemailer.30tools.com/api/validate', 
+response = requests.get('https://truemailer.strivio.world/api/validate', 
                        params={'email': 'test@example.com'})
 data = response.json()
 print(data)`}

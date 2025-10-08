@@ -68,7 +68,7 @@ const createOGImage = (width, height, title, subtitle) => `
   <text x="280" y="410" font-family="Arial, sans-serif" font-size="18" fill="#333333">✓ Easy API integration</text>
   
   <!-- URL -->
-  <text x="${width / 2}" y="${height - 60}" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#f5f5dc">truemailer.30tools.com</text>
+  <text x="${width / 2}" y="${height - 60}" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="#f5f5dc">truemailer.strivio.world</text>
 </svg>
 `;
 
