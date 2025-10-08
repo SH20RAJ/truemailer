@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, ThumbsUp, ThumbsDown, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@stackframe/stack";
 
 export function HelpImproveClient() {
+    const user = useUser();
     const [email, setEmail] = useState("");
     const [domain, setDomain] = useState("");
     const [reason, setReason] = useState("");
@@ -381,7 +383,7 @@ export function HelpImproveClient() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                {!isLoggedIn ? (
+                                                {!user ? (
                                                     <p className="text-xs text-muted-foreground">Login to vote</p>
                                                 ) : (
                                                     <>
