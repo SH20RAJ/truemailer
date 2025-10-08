@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { TodoService } from '@/lib/db';
 
 // GET all todos
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     console.log('[TODO API] Fetching all todos...');
     

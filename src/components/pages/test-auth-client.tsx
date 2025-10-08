@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AuthButtons } from "@/components/auth-buttons";
 import { Loader2 } from "lucide-react";
 import type { User as DbUser } from "@/lib/db/schema";
+import Image from "next/image";
 
 type ApiResponse = { success?: boolean; user?: DbUser; error?: string };
 
@@ -38,6 +39,7 @@ export default function TestAuthClient() {
     } catch { setError("Network error"); } finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (user) fetchDbUser(); }, [user]);
 
   return (
@@ -64,7 +66,7 @@ export default function TestAuthClient() {
                 {user.profileImageUrl && (
                   <div className="flex items-center gap-2">
                     <strong>Profile Image:</strong>
-                    <img src={user.profileImageUrl} alt="Profile" className="w-8 h-8 rounded-full" />
+                    <Image src={user.profileImageUrl} alt="Profile" width={32} height={32} className="rounded-full" unoptimized />
                   </div>
                 )}
               </CardContent>
@@ -110,4 +112,3 @@ export default function TestAuthClient() {
     </div>
   );
 }
-

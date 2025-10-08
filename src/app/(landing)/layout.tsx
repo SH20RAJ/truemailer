@@ -1,5 +1,4 @@
 import { Navbar } from "@/components/landing-v2/navbar";
-import { Footer } from "@/components/landing-v2/footer";
 
 export default function Layout(
     { children }: {

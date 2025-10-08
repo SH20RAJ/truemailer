@@ -8,7 +8,7 @@ interface BlocklistRequest {
   reason?: string;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Get the current user
     const user = await stackServerApp.getUser();

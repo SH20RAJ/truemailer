@@ -4,24 +4,16 @@ import { createClient } from '@libsql/client/web';
 import { eq, and, gte, sql } from 'drizzle-orm';
 import { 
   usersTable, 
-  sessionsTable, 
   todosTable, 
   apiKeysTable, 
   apiUsageTable,
   personalBlocklistTable,
   personalWhitelistTable,
   type User, 
-  type NewUser, 
   type Todo, 
-  type NewTodo,
   type ApiKey,
-  type NewApiKey,
-  type ApiUsage,
-  type NewApiUsage,
   type PersonalBlocklist,
-  type NewPersonalBlocklist,
-  type PersonalWhitelist,
-  type NewPersonalWhitelist
+  type PersonalWhitelist
 } from './schema';
 import * as schema from './schema';
 

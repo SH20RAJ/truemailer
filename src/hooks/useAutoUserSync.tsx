@@ -34,7 +34,7 @@ export function useAutoUserSync() {
     };
 
     syncUser();
-  }, [user?.id]); // Trigger when user ID changes (login/logout)
+  }, [user]); // Trigger when user changes (login/logout)
 
   return { user, synced: syncedRef.current === user?.id };
 }

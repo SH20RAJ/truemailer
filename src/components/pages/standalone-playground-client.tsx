@@ -22,7 +22,7 @@ export default function StandalonePlaygroundClient() {
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [batchResult, setBatchResult] = useState<BatchResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [history, setHistory] = useState<ValidationResult[]>([]);
 
   useEffect(() => {

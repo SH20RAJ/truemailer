@@ -112,7 +112,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
     if (user) {
       syncUser();
     }
-  }, [user]);
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const syncUser = async () => {
     try {

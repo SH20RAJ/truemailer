@@ -7,7 +7,7 @@ function log(message: string, data?: unknown) {
   console.log(`[AUTH API] ${message}`, data ? JSON.stringify(data, null, 2) : '');
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     log('POST /api/auth/sync-user - Starting user sync');
     
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     log('GET /api/auth/sync-user - Fetching user data');
     

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CheckCircle, XCircle, Database, Users, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { User } from "@/lib/db/schema";
+import Image from "next/image";
 
 interface DbStats {
   totalUsers: number;
@@ -98,7 +99,9 @@ export default function DatabaseTestClient() {
             <CardContent>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  {user.profileImageUrl && (<img src={user.profileImageUrl} alt="Profile" className="w-12 h-12 rounded-full border" />)}
+                  {user.profileImageUrl && (
+                    <Image src={user.profileImageUrl} alt="Profile" width={48} height={48} className="rounded-full border" unoptimized />
+                  )}
                   <div><h3 className="font-semibold">{user.displayName || "No name set"}</h3><p className="text-sm text-muted-foreground">{user.primaryEmail}</p></div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -131,4 +134,3 @@ export default function DatabaseTestClient() {
     </div>
   );
 }
-

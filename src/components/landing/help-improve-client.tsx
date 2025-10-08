@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, ThumbsUp, ThumbsDown, AlertTriangle, CheckCircle, Clock, Users } from "lucide-react";
+import { ArrowLeft, ThumbsUp, ThumbsDown, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import Link from "next/link";
 
 export function HelpImproveClient() {
@@ -17,7 +17,7 @@ export function HelpImproveClient() {
     const [reason, setReason] = useState("");
     const [submissionType, setSubmissionType] = useState<"spam" | "allow">("spam");
     const [showSuccess, setShowSuccess] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

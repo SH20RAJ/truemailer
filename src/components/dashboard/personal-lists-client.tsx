@@ -16,9 +16,9 @@ import {
 } from "@/components/ui/select";
 import { 
   Shield, ShieldCheck, Plus, Trash2, Loader2, 
-  Mail, Globe, AlertTriangle, CheckCircle
+  Mail, Globe, AlertTriangle
 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PersonalListEntry {
@@ -185,18 +185,16 @@ export function PersonalListsClient() {
       setBulkProgress({ current: 0, total: lines.length });
 
       const endpoint = bulkListType === 'blocklist' ? '/api/dashboard/blocklist' : '/api/dashboard/whitelist';
-      let success = 0;
       for (let i = 0; i < lines.length; i++) {
         const value = lines[i];
         const inferredType: 'email' | 'domain' = bulkType === 'auto' ? (value.includes('@') ? 'email' : 'domain') : bulkType;
         try {
-          const res = await fetch(endpoint, {
+          await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ emailOrDomain: value, type: inferredType, reason: bulkReason })
           });
-          if (res.ok) success++;
-        } catch (_) {
+        } catch {
           // ignore individual failures, continue
         }
         setBulkProgress({ current: i + 1, total: lines.length });

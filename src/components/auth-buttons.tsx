@@ -3,6 +3,7 @@
 import { useUser, useStackApp } from "@stackframe/stack";
 import { Button } from "@/components/ui/button";
 import { LogIn, LogOut, UserPlus } from "lucide-react";
+import Image from "next/image";
 
 export function AuthButtons() {
   const user = useUser();
@@ -12,10 +13,13 @@ export function AuthButtons() {
     return (
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <img
+          <Image
             src={user.profileImageUrl || "/default-avatar.png"}
             alt={user.displayName || "User"}
-            className="w-8 h-8 rounded-full"
+            width={32}
+            height={32}
+            className="rounded-full"
+            unoptimized
           />
           <span className="text-sm font-medium">
             {user.displayName || user.primaryEmail}
