@@ -3,6 +3,8 @@
 import { useUser } from "@stackframe/stack";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import useSWR, { useSWRConfig } from "swr";
+import useSWRMutation from "swr/mutation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalListsClient } from "./personal-lists-client";
+import { DocsClient } from "./docs-client";
 
 interface ApiKey {
   id: string;
@@ -75,11 +78,57 @@ interface PlaygroundResult {
 
 type Section = "overview" | "keys" | "playground" | "personal-lists" | "docs";
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+async function sendRequest(url: string, { arg }: { arg: { email: string, apiKey: string } }) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-Key': arg.apiKey
+    },
+    body: JSON.stringify({ email: arg.email })
+  });
+  if (!response.ok) {
+    const error = new Error('An error occurred while fetching the data.')
+    // @ts-expect-error Adding custom properties to error object
+    error.info = await response.json()
+    // @ts-expect-error Adding custom properties to error object
+    error.status = response.status
+    throw error
+  }
+  return response.json()
+}
+
 export function DashboardClient({ section }: { section?: Section } = {}) {
   const user = useUser();
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
-  const [apiStats, setApiStats] = useState<ApiStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { mutate } = useSWRConfig();
+
+  const { data: apiKeysData, error: apiKeysError } = useSWR('/api/dashboard/api-keys', fetcher) as { data: { apiKeys: ApiKey[] } | undefined, error: Error | null };
+  const { data: apiStatsData, error: apiStatsError } = useSWR('/api/dashboard/analytics', fetcher) as { data: { stats: ApiStats } | undefined, error: Error | null };
+
+  const { trigger, isMutating } = useSWRMutation('/api/v2/validate', sendRequest, {
+    onSuccess: (data) => {
+      setPlaygroundResult(data as PlaygroundResult);
+    },
+
+    onError: (error) => {
+      console.error('API test failed:', error);
+      setPlaygroundResult({
+        email: playgroundEmail,
+        valid: false,
+        syntax_valid: false,
+        disposable: null,
+        role_based: null,
+        mx_records: null,
+        reason: 'API request failed'
+      });
+    }
+  });
+
+  const apiKeys: ApiKey[] = apiKeysData?.apiKeys || [];
+  const apiStats: ApiStats | null = apiStatsData?.stats || null;
+
   const [creating, setCreating] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [newKeyQuota, setNewKeyQuota] = useState(5000);
@@ -91,7 +140,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
   const [playgroundEmail, setPlaygroundEmail] = useState("xepeg24004@merumart.com");
   const [playgroundApiKey, setPlaygroundApiKey] = useState("");
   const [playgroundResult, setPlaygroundResult] = useState<PlaygroundResult | null>(null);
-  const [playgroundLoading, setPlaygroundLoading] = useState(false);
+  
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -121,35 +170,11 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
       });
       if (response.ok) {
         console.log('User synced successfully');
-        fetchData();
+        mutate('/api/dashboard/api-keys');
+        mutate('/api/dashboard/analytics');
       }
     } catch (error) {
       console.error('Failed to sync user:', error);
-    }
-  };
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      // Fetch API keys and stats
-      const [keysResponse, statsResponse] = await Promise.all([
-        fetch('/api/dashboard/api-keys'),
-        fetch('/api/dashboard/analytics')
-      ]);
-      
-      if (keysResponse.ok) {
-        const keysData = await keysResponse.json() as { apiKeys?: ApiKey[] };
-        setApiKeys(keysData.apiKeys || []);
-      }
-      
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json() as { stats?: ApiStats };
-        setApiStats(statsData.stats || null);
-      }
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -172,7 +197,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
         setShowNewKey(data.secretKey);
         setNewKeyName("");
         setNewKeyQuota(5000);
-        fetchData();
+        mutate('/api/dashboard/api-keys');
       }
     } catch (error) {
       console.error('Failed to create API key:', error);
@@ -190,7 +215,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
       });
       
       if (response.ok) {
-        fetchData();
+        mutate('/api/dashboard/api-keys');
       }
     } catch (error) {
       console.error('Failed to delete API key:', error);
@@ -211,40 +236,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
     setVisibleKeys(newVisible);
   };
 
-  const testPlaygroundApi = async () => {
-    if (!playgroundApiKey || !playgroundEmail) {
-      alert('Please provide both API key and email');
-      return;
-    }
 
-    try {
-      setPlaygroundLoading(true);
-      const response = await fetch('/api/v2/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-API-Key': playgroundApiKey
-        },
-        body: JSON.stringify({ email: playgroundEmail })
-      });
-
-      const result = await response.json() as PlaygroundResult;
-      setPlaygroundResult(result);
-    } catch (error) {
-      console.error('API test failed:', error);
-      setPlaygroundResult({
-        email: playgroundEmail,
-        valid: false,
-        syntax_valid: false,
-        disposable: null,
-        role_based: null,
-        mx_records: null,
-        reason: 'API request failed'
-      });
-    } finally {
-      setPlaygroundLoading(false);
-    }
-  };
 
   if (!user) {
     return (
@@ -268,6 +260,8 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
     "personal-lists": { title: "Personal Lists", desc: "Manage your blocklist and whitelist.", icon: ShieldCheck },
     docs: { title: "Documentation", desc: "Integrate the TruMailer API v2 in minutes.", icon: BookOpen },
   }[activeTab];
+
+  const loading = !apiKeysData && !apiKeysError && !apiStatsData && !apiStatsError;
 
   return (
     <div className="container mx-auto py-6 px-4">
@@ -639,13 +633,13 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                   </div>
                   
                   <Button
-                    onClick={testPlaygroundApi}
-                    disabled={playgroundLoading}
+                    onClick={() => trigger({ email: playgroundEmail, apiKey: playgroundApiKey })}
+                    disabled={isMutating}
                     className="w-full"
                     aria-controls="playground-result"
-                    aria-busy={playgroundLoading}
+                    aria-busy={isMutating}
                   >
-                    {playgroundLoading ? (
+                    {isMutating ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     ) : (
                       <Play className="w-4 h-4 mr-2" />
@@ -807,147 +801,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
 
             {/* Documentation Tab */}
             <TabsContent value="docs" className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BookOpen className="w-5 h-5" />
-                      Getting Started
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">1. Create an API Key</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Go to the Overview tab and create your first API key. Choose a descriptive name and set your monthly quota.
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">2. Make Your First Request</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Use the playground to test your API key, or make a POST request to /api/v2/validate with your API key in the X-API-Key header.
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">3. Monitor Usage</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Track your API usage and monitor your monthly quota in the analytics section.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>API Reference</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Endpoint</h4>
-                      <code className="text-xs bg-muted px-2 py-1 rounded">POST /api/v2/validate</code>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Headers</h4>
-                      <div className="space-y-1">
-                        <code className="text-xs bg-muted px-2 py-1 rounded block">Content-Type: application/json</code>
-                        <code className="text-xs bg-muted px-2 py-1 rounded block">X-API-Key: tm_your_api_key</code>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Request Body</h4>
-                      <pre className="text-xs bg-muted p-3 rounded">
-{`{
-  "email": "xepeg24004@merumart.com"
-}`}
-                      </pre>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Enhanced Response</h4>
-                      <pre className="text-xs bg-muted p-3 rounded overflow-auto">
-{`{
-  "email": "xepeg24004@merumart.com",
-  "domain": "merumart.com",
-  "valid": false,
-  "syntax_valid": true,
-  "disposable": true,
-  "role_based": false,
-  "mx_records": true,
-  "spammy": true,
-  "allowed_list": false,
-  "confidence_score": 0.1,
-  "risk_level": "high",
-  "suggestions": [
-    "This domain is known for providing temporary/disposable email addresses"
-  ],
-  "personal_override": false,
-  "reason": "Disposable email detected",
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "cache_info": {
-    "disposable_domains_count": 12847,
-    "allowed_domains_count": 156,
-    "last_updated": "2024-01-15T08:00:00.000Z"
-  }
-}`}
-                      </pre>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Code Examples</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="curl" className="w-full">
-                    <TabsList>
-                      <TabsTrigger value="curl">cURL</TabsTrigger>
-                      <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                      <TabsTrigger value="python">Python</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="curl">
-                      <pre className="text-xs bg-muted p-4 rounded overflow-auto">
-{`curl -X POST http://localhost:3000/api/v2/validate \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: tm_your_api_key_here" \\
-  -d '{"email": "xepeg24004@merumart.com"}'`}
-                      </pre>
-                    </TabsContent>
-                    <TabsContent value="javascript">
-                      <pre className="text-xs bg-muted p-4 rounded overflow-auto">
-{`const response = await fetch('/api/v2/validate', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-API-Key': 'tm_your_api_key_here'
-  },
-  body: JSON.stringify({ email: 'xepeg24004@merumart.com' })
-});
-
-const result = await response.json();
-console.log(result);`}
-                      </pre>
-                    </TabsContent>
-                    <TabsContent value="python">
-                      <pre className="text-xs bg-muted p-4 rounded overflow-auto">
-{`import requests
-
-response = requests.post(
-    'http://localhost:3000/api/v2/validate',
-    headers={
-        'Content-Type': 'application/json',
-        'X-API-Key': 'tm_your_api_key_here'
-    },
-    json={'email': 'xepeg24004@merumart.com'}
-)
-
-result = response.json()
-print(result)`}
-                      </pre>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
+              <DocsClient />
             </TabsContent>
           </Tabs>
         )}

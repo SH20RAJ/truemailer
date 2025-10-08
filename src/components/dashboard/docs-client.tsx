@@ -112,18 +112,18 @@ print(result)`;
         <CardContent className="space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-2">Endpoint</h4>
-            <CodeBlock language="bash" value="POST /api/v2/validate" />
+            <CodeBlock language="bash" code="POST /api/v2/validate" />
           </div>
           <div>
             <h4 className="text-sm font-medium mb-2">Headers</h4>
             <div className="space-y-1">
-              <CodeBlock language="bash" value="Content-Type: application/json" />
-              <CodeBlock language="bash" value="X-API-Key: tm_your_api_key" />
+              <CodeBlock language="bash" code="Content-Type: application/json" />
+              <CodeBlock language="bash" code="X-API-Key: tm_your_api_key" />
             </div>
           </div>
           <div>
             <h4 className="text-sm font-medium mb-2">Request Body</h4>
-            <CodeBlock language="json" value={`{
+            <CodeBlock language="json" code={`{
   "email": "test@example.com"
 }`}/>
           </div>
@@ -142,13 +142,13 @@ print(result)`;
               <TabsTrigger value="python">Python</TabsTrigger>
             </TabsList>
             <TabsContent value="curl">
-              <CodeBlock language="bash" value={curlExample} />
+              <CodeBlock language="bash" code={curlExample} />
             </TabsContent>
             <TabsContent value="javascript">
-              <CodeBlock language="javascript" value={javascriptExample} />
+              <CodeBlock language="javascript" code={javascriptExample} />
             </TabsContent>
             <TabsContent value="python">
-              <CodeBlock language="python" value={pythonExample} />
+              <CodeBlock language="python" code={pythonExample} />
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -159,7 +159,7 @@ print(result)`;
           <CardTitle>Example Response</CardTitle>
         </CardHeader>
         <CardContent>
-          <CodeBlock language="json" value={jsonResponse} />
+          <CodeBlock language="json" code={jsonResponse} />
         </CardContent>
       </Card>
     </div>
