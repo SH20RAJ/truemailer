@@ -137,7 +137,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
   
   // Playground state
-  const [playgroundEmail, setPlaygroundEmail] = useState("xepeg24004@merumart.com");
+  const [playgroundEmail, setPlaygroundEmail] = useState("xepeg24004@100likers.com");
   const [playgroundApiKey, setPlaygroundApiKey] = useState("");
   const [playgroundResult, setPlaygroundResult] = useState<PlaygroundResult | null>(null);
   
@@ -627,7 +627,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                         id="playground-email"
                         value={playgroundEmail}
                         onChange={(e) => setPlaygroundEmail(e.target.value)}
-                        placeholder="xepeg24004@merumart.com"
+                        placeholder="xepeg24004@100likers.com"
                       />
                     </div>
                   </div>
