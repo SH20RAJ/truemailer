@@ -1,0 +1,174 @@
+{
+  "version": "1.0",
+  "brand": {
+    "name": "TruMailer",
+    "palette": {
+      "black": "#000000",
+      "off_white": "#f5f5dc",
+      "accent_green": "#22c55e",
+      "neutral_gray_1": "#333333",
+      "neutral_gray_2": "#666666"
+    },
+    "style_tags": [
+      "minimal",
+      "high-contrast",
+      "modern fintech",
+      "clean grid",
+      "glassmorphism subtle",
+      "premium product lighting",
+      "vector/3D hybrid"
+    ]
+  },
+  "global_negative_prompt": "blurry, noisy, low-res, messy layout, cartoonish, busy background, distorted icons, heavy gradients, watermark, embedded text, text artifacts, logo artifacts",
+  "images": [
+    {
+      "id": "linkedin_hero_191_1",
+      "title": "LinkedIn Hero Poster",
+      "objective": "High-impact hero visual for LinkedIn post introducing TruMailer API.",
+      "prompt": "Minimal, high-contrast tech poster for TruMailer (email validation API). Black background with warm off-white card panels (#f5f5dc), accent neon-green verification checks (#22c55e). Sleek envelope + shield check icon, subtle grid pattern, soft glow edges, depth, gentle shadows. Glassmorphism UI card showing code-like JSON tokens (valid, disposable, mx_records, risk_level, confidence_score) as abstract chips, not legible text. Right side code/JSON card, left side clean whitespace for headline. Premium product-shot lighting, crisp edges, modern fintech aesthetic, vector/3D hybrid, cinematic composition, trending LinkedIn visual, no embedded text or logos, no watermark.",
+      "negative_prompt": "watermark, text, brand marks, noisy gradients, busy clutter, low contrast",
+      "colors": ["#000000", "#f5f5dc", "#22c55e", "#333333", "#666666"],
+      "composition": {
+        "background": "black with faint grid",
+        "primary_icon": "envelope with shield-check badge",
+        "foreground_cards": 2,
+        "ui_style": "glassmorphism subtle with soft glow",
+        "lighting": "studio, softbox, premium",
+        "depth": "layered panels with shallow DOF"
+      },
+      "layout": {
+        "aspect_ratio": "1.91:1",
+        "safe_areas": {
+          "headline_left_padding": 0.12,
+          "headline_top_padding": 0.12,
+          "cta_bottom_center_padding": 0.08
+        },
+        "rule_of_thirds": true
+      },
+      "params": {
+        "midjourney": { "ar": "1.91:1", "stylize": 300, "version": 6 },
+        "sdxl": { "width": 1200, "height": 630, "cfg": 7, "steps": 35, "sampler": "DPM++ 2M Karras" }
+      },
+      "overlays": {
+        "headline": "Stop Wasting Send Credits.",
+        "subhead": "Validate emails before they cost you.",
+        "badge": "TruMailer API",
+        "footer": "truemailer.strivio.world"
+      },
+      "export": { "filename": "hero_linkedin_191x1.png" }
+    },
+    {
+      "id": "api_flow_request_response",
+      "title": "API Request → Response",
+      "objective": "Explain TruMailer’s request/response visually without text.",
+      "prompt": "Modern black background with off-white workflow panel. Two-pane composition: left pane abstract request (envelope icon launching), right pane abstract response (glass code card with JSON-like blocks). Center floating shield-check icon and faint directional arrow shapes to imply flow. Use accent green (#22c55e) for validation cues. Clean grid, crisp edges, premium lighting, no embedded text or logos.",
+      "negative_prompt": "busy arrows, crowded icons, legible text, watermark",
+      "colors": ["#000000", "#f5f5dc", "#22c55e", "#333333"],
+      "composition": {
+        "panes": 2,
+        "centerpiece": "shield-check",
+        "arrows": "subtle shapes, semi-transparent",
+        "ui_style": "glassmorphism panels"
+      },
+      "layout": {
+        "aspect_ratio": "16:9",
+        "safe_areas": { "caption_top_left": 0.1 },
+        "rule_of_thirds": true
+      },
+      "params": {
+        "midjourney": { "ar": "16:9", "stylize": 200, "version": 6 },
+        "sdxl": { "width": 1600, "height": 900, "cfg": 6.5, "steps": 30 }
+      },
+      "export": { "filename": "api_flow_request_response.png" }
+    },
+    {
+      "id": "json_card_closeup",
+      "title": "JSON Validation Card Close‑Up",
+      "objective": "Close-up product visual of the JSON-style result in a glass card.",
+      "prompt": "Macro close-up of a glass UI card on an off-white panel showing code-like JSON blocks: fields for syntax_valid, disposable, role_based, mx_records, risk_level, confidence_score represented as colored chips and bars (accent green for passing). Minimal, high-contrast, soft rim light, shallow depth of field, premium product render. No legible text, no watermark, no brand logos.",
+      "negative_prompt": "text blocks, noisy reflections, clutter, watermark",
+      "colors": ["#f5f5dc", "#000000", "#22c55e", "#333333"],
+      "composition": {
+        "camera": "macro",
+        "focus": "front card sharp, background softly blurred",
+        "materials": "frosted glass, matte off-white"
+      },
+      "layout": {
+        "aspect_ratio": "4:3",
+        "safe_areas": { "caption_bottom_left": 0.1 }
+      },
+      "params": {
+        "midjourney": { "ar": "4:3", "stylize": 250, "version": 6 },
+        "sdxl": { "width": 1400, "height": 1050, "cfg": 7, "steps": 35 }
+      },
+      "export": { "filename": "json_card_closeup.png" }
+    },
+    {
+      "id": "analytics_overview",
+      "title": "Analytics & Usage Overview",
+      "objective": "Visualize API usage analytics without real data or text.",
+      "prompt": "Dashboard-style composition on black: off-white card with clean mini line chart, bar chart, and circular stat chips. Accent green highlights for positive metrics. Glass panels, subtle glow, precise grid alignment, modern fintech feel. No labels or numbers, no text, no watermark.",
+      "negative_prompt": "messy charts, tiny unreadable text, watermark, oversaturated colors",
+      "colors": ["#000000", "#f5f5dc", "#22c55e", "#333333", "#666666"],
+      "composition": {
+        "charts": ["line", "bar", "pill-stats"],
+        "ui_style": "glass panels with shadows",
+        "lighting": "soft studio"
+      },
+      "layout": {
+        "aspect_ratio": "16:9",
+        "safe_areas": { "caption_top_right": 0.08 }
+      },
+      "params": {
+        "midjourney": { "ar": "16:9", "stylize": 200, "version": 6 },
+        "sdxl": { "width": 1600, "height": 900, "cfg": 6.5, "steps": 32 }
+      },
+      "export": { "filename": "analytics_overview.png" }
+    },
+    {
+      "id": "batch_validation",
+      "title": "Batch Validation Illustration",
+      "objective": "Show multiple emails being validated and filtered at once.",
+      "prompt": "Isometric cluster of envelope icons flowing into a clean off-white filter panel, emerging as validated items with accent-green checks. Subtle network lines, soft glow, layered depth, modern clean aesthetic. Optional muted gray x-marks for filtered-out items, used sparingly. No text, no logos, no watermark.",
+      "negative_prompt": "crowded cluster, harsh red, busy geometry, text artifacts",
+      "colors": ["#f5f5dc", "#000000", "#22c55e", "#333333"],
+      "composition": {
+        "style": "isometric",
+        "flow": "left-to-right",
+        "badges": ["green-check", "gray-x"],
+        "materials": "matte with glass accents"
+      },
+      "layout": {
+        "aspect_ratio": "3:2",
+        "safe_areas": { "headline_top_left": 0.1 }
+      },
+      "params": {
+        "midjourney": { "ar": "3:2", "stylize": 250, "version": 6 },
+        "sdxl": { "width": 1500, "height": 1000, "cfg": 7, "steps": 34 }
+      },
+      "export": { "filename": "batch_validation.png" }
+    },
+    {
+      "id": "icon_set_validation",
+      "title": "Validation Icon Set",
+      "objective": "Small icon set to sprinkle through the article.",
+      "prompt": "Cohesive flat/soft 3D icon set on off-white: envelope, shield-check, radar-like MX indicator, group silhouette for role-based, clock/flash for real-time. Accent green for positive states, black outlines, soft shadows. Minimal, crisp, no text or brand marks.",
+      "negative_prompt": "mismatched styles, heavy gradients, noisy textures, text, watermark",
+      "colors": ["#f5f5dc", "#000000", "#22c55e", "#333333"],
+      "composition": {
+        "icons": ["envelope", "shield_check", "mx_radar", "role_group", "realtime_lightning"],
+        "grid": "5-column evenly spaced"
+      },
+      "layout": {
+        "aspect_ratio": "1:1",
+        "safe_areas": { "edge_padding": 0.08 }
+      },
+      "params": {
+        "midjourney": { "ar": "1:1", "stylize": 150, "version": 6 },
+        "sdxl": { "width": 1200, "height": 1200, "cfg": 6.5, "steps": 28 }
+      },
+      "export": { "filename": "icons_validation_set.png" }
+    }
+  ]
+}
+
