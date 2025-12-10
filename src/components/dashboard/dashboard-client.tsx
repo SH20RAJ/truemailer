@@ -288,8 +288,8 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                     key={tab}
                     onClick={() => handleTabChange(tab)}
                     className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
                       }`}
                   >
                     {tab === "personal-lists" ? "Personal Lists" : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -549,7 +549,7 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
                     </div>
                   </div>
                   <div className="p-6 space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="grid gap-4 md:grid-cols-2 mb-6">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">API Key</label>
                         <Password

@@ -1,9 +1,13 @@
-"use client";
-
-
+import { useState } from 'react';
 import { motion } from "framer-motion";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Check, Copy } from "lucide-react";
+import { ActionIcon } from "rizzui";
 
 export function HowItWorks() {
+  const [copied, setCopied] = useState(false);
+
   const steps = [
     {
       title: "Make API Request",
@@ -32,7 +36,26 @@ export function HowItWorks() {
     }
   ];
 
+  const codeExample = `// Example API Request
+const response = await fetch('https://api.truemailer.com/v1/verify', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'user@example.com'
+  })
+});
 
+const data = await response.json();
+console.log(data.isValid); // true or false`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(codeExample);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <section id="how-it-works" className="py-20">
@@ -172,33 +195,36 @@ export function HowItWorks() {
               </p>
             </div>
             <div className="p-6 pt-0">
-              <div className="relative group rounded-lg overflow-hidden bg-muted/50 font-mono text-sm border border-primary/10">
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {/* Copy button normally here but skipping for brevity */}
+              <div className="relative group rounded-xl overflow-hidden shadow-2xl">
+                <SyntaxHighlighter
+                  language="javascript"
+                  style={vscDarkPlus}
+                  customStyle={{
+                    margin: 0,
+                    borderRadius: '0.75rem',
+                    fontSize: '0.9rem',
+                    padding: '1.5rem',
+                    background: '#1e1e1e',
+                  }}
+                  showLineNumbers={true}
+                >
+                  {codeExample}
+                </SyntaxHighlighter>
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ActionIcon
+                    size="sm"
+                    variant="solid"
+                    onClick={copyToClipboard}
+                    className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/20 backdrop-blur-sm"
+                  >
+                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </ActionIcon>
                 </div>
-                <div className="p-4 overflow-x-auto">
-                  <pre><code className="text-primary">
-                    {`// Example API Request
-const response = await fetch('https://api.truemailer.com/v1/verify', {
-  method: 'POST',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    email: 'user@example.com'
-  })
-});
-
-const data = await response.json();
-console.log(data.isValid); // true or false`}
-                  </code ></pre >
-                </div >
-              </div >
-            </div >
-          </div >
-        </motion.div >
-        <div className="pt-4">
+              </div>
+            </div>
+          </div>
+        </motion.div>
+        <div className="pt-4 max-w-4xl mx-auto">
           <h3 className="text-lg font-semibold mb-2">Response Fields</h3>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground">
             <li className="flex items-center">
@@ -206,15 +232,15 @@ console.log(data.isValid); // true or false`}
               <code className="bg-muted px-2 py-1 rounded mr-2">valid_syntax</code> - Email format validity
             </li>
             <li className="flex items-center">
-              <span className="h-2 w-2 rounded-full bg-purple-40 mr-2"></span>
+              <span className="h-2 w-2 rounded-full bg-purple-400 mr-2"></span>
               <code className="bg-muted px-2 py-1 rounded mr-2">mx_found</code> - Domain mail server exists
             </li>
             <li className="flex items-center">
-              <span className="h-2 w-2 rounded-full bg-blue-40 mr-2"></span>
+              <span className="h-2 w-2 rounded-full bg-blue-400 mr-2"></span>
               <code className="bg-muted px-2 py-1 rounded mr-2">disposable</code> - Temporary email service
             </li>
             <li className="flex items-center">
-              <span className="h-2 w-2 rounded-full bg-purple-40 mr-2"></span>
+              <span className="h-2 w-2 rounded-full bg-purple-400 mr-2"></span>
               <code className="bg-muted px-2 py-1 rounded mr-2">role_based</code> - Generic email address
             </li>
             <li className="flex items-center">
@@ -227,7 +253,7 @@ console.log(data.isValid); // true or false`}
             </li>
           </ul>
         </div>
-      </div >
-    </section >
+      </div>
+    </section>
   );
 }

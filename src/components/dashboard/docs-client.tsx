@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { BookOpen, Copy, Check } from "lucide-react";
-import { Button } from "rizzui";
+import { Button, Title, Text, ActionIcon } from "rizzui";
 
 export function DocsClient() {
   const [activeTab, setActiveTab] = useState("curl");
@@ -68,29 +70,73 @@ print(result)`;
   }
 }`;
 
+  const requestBodyExample = `{
+  "email": "test@example.com"
+}`;
+
+  const getLanguage = () => {
+    if (activeTab === 'curl') return 'bash';
+    if (activeTab === 'javascript') return 'javascript';
+    if (activeTab === 'python') return 'python';
+    return 'text';
+  };
+
+  const getCode = () => {
+    if (activeTab === 'curl') return curlExample;
+    if (activeTab === 'javascript') return javascriptExample;
+    if (activeTab === 'python') return pythonExample;
+    return '';
+  };
+
+  const CodeBlock = ({ code, language, id }: { code: string; language: string; id: string }) => (
+    <div className="relative group">
+      <SyntaxHighlighter
+        language={language}
+        style={vscDarkPlus}
+        customStyle={{
+          margin: 0,
+          borderRadius: '0.5rem',
+          fontSize: '0.875rem',
+          padding: '1rem',
+        }}
+        showLineNumbers={false}
+      >
+        {code}
+      </SyntaxHighlighter>
+      <ActionIcon
+        size="sm"
+        variant="solid"
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+        onClick={() => copyToClipboard(code, id)}
+      >
+        {copied === id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+      </ActionIcon>
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-primary/10">
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-primary" />
-            <h3 className="text-xl font-bold">Getting Started</h3>
+            <Title as="h3" className="text-xl font-bold">Getting Started</Title>
           </div>
         </div>
         <div className="p-6 space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-2">1. Create an API Key</h4>
-            <p className="text-sm text-muted-foreground">
+            <Text className="text-sm text-muted-foreground">
               Go to the{' '}
               <a href="/dashboard/keys" className="text-primary hover:underline">
                 API Keys
               </a>{' '}
               tab and create your first API key. Choose a descriptive name and set your monthly quota.
-            </p>
+            </Text>
           </div>
           <div>
             <h4 className="text-sm font-medium mb-2">2. Make Your First Request</h4>
-            <p className="text-sm text-muted-foreground">
+            <Text className="text-sm text-muted-foreground">
               Use the{' '}
               <a href="/dashboard/playground" className="text-primary hover:underline">
                 Playground
@@ -98,51 +144,47 @@ print(result)`;
               to test your API key, or make a POST request to{' '}
               <code className="text-xs bg-muted px-1 py-0.5 rounded">/api/v2/validate</code> with your API key in the{' '}
               <code className="text-xs bg-muted px-1 py-0.5 rounded">X-API-Key</code> header.
-            </p>
+            </Text>
           </div>
           <div>
             <h4 className="text-sm font-medium mb-2">3. Monitor Usage</h4>
-            <p className="text-sm text-muted-foreground">
+            <Text className="text-sm text-muted-foreground">
               Track your API usage and monitor your monthly quota in the{' '}
               <a href="/dashboard/overview" className="text-primary hover:underline">
                 Overview
               </a>{' '}
               section.
-            </p>
+            </Text>
           </div>
         </div>
       </div>
 
       <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-primary/10">
-          <h3 className="text-xl font-bold">API Reference</h3>
+          <Title as="h3" className="text-xl font-bold">API Reference</Title>
         </div>
         <div className="p-6 space-y-4">
           <div>
             <h4 className="text-sm font-medium mb-2">Endpoint</h4>
-            <div className="bg-muted p-3 rounded-md font-mono text-sm">POST /api/v2/validate</div>
+            <CodeBlock code="POST /api/v2/validate" language="text" id="endpoint" />
           </div>
           <div>
             <h4 className="text-sm font-medium mb-2">Headers</h4>
-            <div className="space-y-1">
-              <div className="bg-muted p-3 rounded-md font-mono text-sm">Content-Type: application/json</div>
-              <div className="bg-muted p-3 rounded-md font-mono text-sm">X-API-Key: tm_your_api_key</div>
+            <div className="space-y-2">
+              <CodeBlock code="Content-Type: application/json" language="text" id="header1" />
+              <CodeBlock code="X-API-Key: tm_your_api_key" language="text" id="header2" />
             </div>
           </div>
           <div>
             <h4 className="text-sm font-medium mb-2">Request Body</h4>
-            <pre className="bg-muted p-3 rounded-md font-mono text-sm overflow-x-auto">
-              {`{
-  "email": "test@example.com"
-}`}
-            </pre>
+            <CodeBlock code={requestBodyExample} language="json" id="request-body" />
           </div>
         </div>
       </div>
 
       <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-primary/10">
-          <h3 className="text-xl font-bold">Code Examples</h3>
+          <Title as="h3" className="text-xl font-bold">Code Examples</Title>
         </div>
         <div className="p-6">
           <div className="w-full">
@@ -161,38 +203,17 @@ print(result)`;
               ))}
             </div>
 
-            <div className="relative">
-              <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-                <code>
-                  {activeTab === 'curl' && curlExample}
-                  {activeTab === 'javascript' && javascriptExample}
-                  {activeTab === 'python' && pythonExample}
-                </code>
-              </pre>
-              <Button
-                size="sm"
-                variant="flat"
-                className="absolute top-2 right-2 h-8 w-8 p-0"
-                onClick={() => copyToClipboard(
-                  activeTab === 'curl' ? curlExample : activeTab === 'javascript' ? javascriptExample : pythonExample,
-                  activeTab
-                )}
-              >
-                {copied === activeTab ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+            <CodeBlock code={getCode()} language={getLanguage()} id={`example-${activeTab}`} />
           </div>
         </div>
       </div>
 
       <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
         <div className="p-6 border-b border-primary/10">
-          <h3 className="text-xl font-bold">Example Response</h3>
+          <Title as="h3" className="text-xl font-bold">Example Response</Title>
         </div>
         <div className="p-6">
-          <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-            <code>{jsonResponse}</code>
-          </pre>
+          <CodeBlock code={jsonResponse} language="json" id="response" />
         </div>
       </div>
     </div>

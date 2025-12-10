@@ -23,7 +23,7 @@ export function AutoRedirect() {
             setHasRedirected(true);
             // Only redirect if we're not already on the dashboard
             if (window.location.pathname !== '/dashboard') {
-              router.push('/dashboard');
+              // router.push('/dashboard');
             }
           } else {
             console.error('Failed to sync user');
