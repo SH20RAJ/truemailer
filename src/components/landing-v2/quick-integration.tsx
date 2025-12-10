@@ -1,11 +1,23 @@
 "use client";
 
 import { Button } from "rizzui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+
+declare global {
+  interface Window {
+    hljs: any;
+  }
+}
 
 export function QuickIntegration() {
   const [activeTab, setActiveTab] = useState<"nodejs" | "python" | "php">("nodejs");
+
+  useEffect(() => {
+    if (window.hljs) {
+      window.hljs.highlightAll();
+    }
+  }, [activeTab]);
 
   const codeExamples = {
     nodejs: {
@@ -210,7 +222,7 @@ foreach ($emails as $email) {
                 </div>
                 <div className="p-4 overflow-x-auto">
                   <pre className="text-sm font-mono text-foreground">
-                    <code>{codeExamples[activeTab].code}</code>
+                    <code className={`language-${activeTab === 'nodejs' ? 'javascript' : activeTab}`}>{codeExamples[activeTab].code}</code>
                   </pre>
                 </div>
               </div>

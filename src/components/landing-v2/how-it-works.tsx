@@ -1,12 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Check, Copy } from "lucide-react";
 import { ActionIcon } from "rizzui";
 
+declare global {
+  interface Window {
+    hljs: any;
+  }
+}
+
 export function HowItWorks() {
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (window.hljs) {
+      window.hljs.highlightAll();
+    }
+  }, []);
 
   const steps = [
     {
@@ -196,20 +206,9 @@ console.log(data.isValid); // true or false`;
             </div>
             <div className="p-6 pt-0">
               <div className="relative group rounded-xl overflow-hidden shadow-2xl">
-                <SyntaxHighlighter
-                  language="javascript"
-                  style={vscDarkPlus}
-                  customStyle={{
-                    margin: 0,
-                    borderRadius: '0.75rem',
-                    fontSize: '0.9rem',
-                    padding: '1.5rem',
-                    background: '#1e1e1e',
-                  }}
-                  showLineNumbers={true}
-                >
-                  {codeExample}
-                </SyntaxHighlighter>
+                <pre className="text-sm font-mono text-foreground bg-[#1e1e1e] p-6 rounded-xl m-0">
+                  <code className="language-javascript">{codeExample}</code>
+                </pre>
                 <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
                   <ActionIcon
                     size="sm"

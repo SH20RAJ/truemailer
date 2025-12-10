@@ -1,7 +1,20 @@
 import { Button } from "rizzui";
 import Link from "next/link";
+import { useEffect } from "react";
+
+declare global {
+  interface Window {
+    hljs: any;
+  }
+}
 
 export function ApiUsage() {
+  useEffect(() => {
+    if (window.hljs) {
+      window.hljs.highlightAll();
+    }
+  }, []);
+
   return (
     <div id="api-usage" className="container mx-auto px-4 py-16 md:py-24 bg-muted/50">
       <div className="text-center mb-16">
@@ -23,13 +36,16 @@ export function ApiUsage() {
 
             <h3 className="text-lg font-semibold mb-2">Response</h3>
             <pre className="bg-muted p-4 rounded-md overflow-x-auto">
-              {`{
+              <code className="language-json">
+{`{
   "email": "example@gmail.com",
   "valid_syntax": true,
   "mx_found": true,
   "disposable": false,
   "role_based": false
-}`}         </pre>
+}`}
+              </code>
+            </pre>
           </div>
         </div>
 
