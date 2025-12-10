@@ -37,7 +37,7 @@ export function HowItWorks() {
   ];
 
   const codeExample = `// Example API Request
-const response = await fetch('https://api.truemailer.com/v1/verify', {
+const response = await fetch('https://truemailer.strivio.world/v1/verify', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',

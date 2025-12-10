@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DashboardClient } from "@/components/dashboard/dashboard-client";
+import { ApiKeysClient } from "@/components/dashboard/api-keys-client";
 
 export const metadata: Metadata = {
   title: "API Keys",
@@ -7,6 +7,6 @@ export const metadata: Metadata = {
 };
 
 export default function KeysPage() {
-  return <DashboardClient section="keys" />;
+  return <ApiKeysClient />;
 }
 
