@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 export function Features() {
   const features = [
     {
@@ -36,17 +34,17 @@ export function Features() {
           Everything you need for comprehensive email validation
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {features.map((feature, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-2xl">{feature.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div key={index} className="bg-card/50 border border-primary/20 rounded-xl p-6 hover:shadow-lg transition-shadow">
+            <div className="mb-4">
+              <h3 className="text-2xl font-bold">{feature.title}</h3>
+            </div>
+            <div>
               <p className="text-muted-foreground">{feature.description}</p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </div>

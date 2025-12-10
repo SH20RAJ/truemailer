@@ -1,10 +1,8 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { Button } from "rizzui";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { CodeBlock } from "@/components/ui/code-block";
+import { motion } from "framer-motion";
 
 export function QuickIntegration() {
   const [activeTab, setActiveTab] = useState<"nodejs" | "python" | "php">("nodejs");
@@ -179,40 +177,45 @@ foreach ($emails as $email) {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="bg-card/50 border-primary/20">
-            <CardHeader>
+          <div className="bg-card/50 border border-primary/20 rounded-xl">
+            <div className="p-6">
               <div className="flex flex-wrap gap-2">
                 <Button
-                  variant={activeTab === "nodejs" ? "default" : "outline"}
+                  variant={activeTab === "nodejs" ? "solid" : "outline"}
                   onClick={() => setActiveTab("nodejs")}
                   className={activeTab === "nodejs" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}
                 >
                   Node.js
                 </Button>
                 <Button
-                  variant={activeTab === "python" ? "default" : "outline"}
+                  variant={activeTab === "python" ? "solid" : "outline"}
                   onClick={() => setActiveTab("python")}
                   className={activeTab === "python" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}
                 >
                   Python
                 </Button>
                 <Button
-                  variant={activeTab === "php" ? "default" : "outline"}
+                  variant={activeTab === "php" ? "solid" : "outline"}
                   onClick={() => setActiveTab("php")}
                   className={activeTab === "php" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}
                 >
                   PHP
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent>
-              <CodeBlock
-                code={codeExamples[activeTab].code}
-                language={activeTab === 'nodejs' ? 'javascript' : activeTab}
-                filename={codeExamples[activeTab].filename}
-              />
-            </CardContent>
-          </Card>
+            </div>
+            <div className="p-6 pt-0">
+              <div className="bg-muted rounded-lg overflow-hidden border border-border text-left">
+                <div className="flex items-center justify-between px-4 py-2 bg-muted/50 border-b border-border">
+                  <span className="text-xs font-medium text-muted-foreground">{codeExamples[activeTab].filename}</span>
+                </div>
+                <div className="p-4 overflow-x-auto">
+                  <pre className="text-sm font-mono text-foreground">
+                    <code>{codeExamples[activeTab].code}</code>
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

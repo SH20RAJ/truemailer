@@ -1,7 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button } from "rizzui";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -72,22 +71,20 @@ export function Community() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card className="h-full bg-card/50 border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                <CardHeader>
+              <div className="h-full bg-card/50 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 rounded-xl">
+                <div className="p-6">
                   <div className="flex items-center mb-4">
                     {item.icon}
-                    <CardTitle className="ml-3 text-xl">{item.title}</CardTitle>
+                    <h3 className="ml-3 text-xl font-semibold">{item.title}</h3>
                   </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="p-6 pt-0">
                   <p className="text-muted-foreground mb-4">{item.description}</p>
-                  <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" asChild>
-                    <Link href={item.link} target="_blank">
-                      Visit
-                    </Link>
+                  <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10" as={Link} href={item.link} target="_blank">
+                    Visit
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -99,19 +96,17 @@ export function Community() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="bg-gradient-to-r from-muted/30 to-primary/30 border-primary/30 max-w-2xl mx-auto">
-            <CardContent className="py-8">
+          <div className="bg-gradient-to-r from-muted/30 to-primary/30 border border-primary/30 max-w-2xl mx-auto rounded-xl">
+            <div className="p-6 pt-0 py-8">
               <h3 className="text-2xl font-bold mb-2">MIT Licensed</h3>
               <p className="text-muted-foreground mb-6">
                 TrueMailer is completely free and open source under the permissive MIT license.
               </p>
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-medium transition-all duration-300 transform hover:scale-105" asChild>
-                <Link href="https://github.com/sh20raj/truemailer" target="_blank">
-                  View License on GitHub
-                </Link>
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-medium transition-all duration-300 transform hover:scale-105" as={Link} href="https://github.com/sh20raj/truemailer" target="_blank">
+                View License on GitHub
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

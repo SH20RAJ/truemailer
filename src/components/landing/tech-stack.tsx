@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
 export function TechStack() {
   const techStack = [
     {
@@ -27,18 +25,18 @@ export function TechStack() {
           Built with modern technologies for maximum performance
         </p>
       </div>
-      
+
       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         {techStack.map((tech, index) => (
-          <Card key={index} className="text-center hover:shadow-lg transition-shadow">
-            <CardHeader>
+          <div key={index} className="bg-card/50 border border-primary/20 rounded-xl text-center p-6 hover:shadow-lg transition-shadow">
+            <div className="mb-4">
               <div className="text-5xl mb-4">{tech.emoji}</div>
-              <CardTitle className="text-xl">{tech.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
+              <h3 className="text-xl font-bold">{tech.title}</h3>
+            </div>
+            <div>
               <p className="text-muted-foreground">{tech.description}</p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </div>

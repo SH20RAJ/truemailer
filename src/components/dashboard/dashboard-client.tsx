@@ -5,17 +5,22 @@ import { useState, useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useSWR, { useSWRConfig } from "swr";
 import useSWRMutation from "swr/mutation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import {
+  Button,
+  Input,
+  Badge,
+  Title,
+  Text,
+  ActionIcon,
+  Password,
+  Modal
+} from "rizzui";
 import { AuthButtons } from "@/components/auth-buttons";
-import { 
+import {
   User, Clock, Key, BarChart3,
-  Plus, Copy, Eye, EyeOff, Trash2, Loader2, Code, BookOpen, Play, ShieldCheck
+  Plus, Copy, Eye, EyeOff, Trash2, Loader2, Code, BookOpen, Play, ShieldCheck,
+  X
 } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ResponsiveContainer,
   LineChart,
@@ -27,8 +32,6 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PersonalListsClient } from "./personal-lists-client";
 import { DocsClient } from "./docs-client";
 
@@ -135,18 +138,17 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
   const [showNewKey, setShowNewKey] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
-  
+
   // Playground state
   const [playgroundEmail, setPlaygroundEmail] = useState("xepeg24004@100likers.com");
   const [playgroundApiKey, setPlaygroundApiKey] = useState("");
   const [playgroundResult, setPlaygroundResult] = useState<PlaygroundResult | null>(null);
-  
+
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<Section>(section ?? "overview");
 
-  // Derive active section from prop or query (fallback)
   useEffect(() => {
     if (section) {
       setActiveTab(section);
@@ -156,7 +158,6 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
     setActiveTab(q);
   }, [section, searchParams]);
 
-  // Auto-sync user on page load
   useEffect(() => {
     if (user) {
       syncUser();
@@ -165,11 +166,8 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
 
   const syncUser = async () => {
     try {
-      const response = await fetch('/api/auth/sync-user', {
-        method: 'POST',
-      });
+      const response = await fetch('/api/auth/sync-user', { method: 'POST' });
       if (response.ok) {
-        console.log('User synced successfully');
         mutate('/api/dashboard/api-keys');
         mutate('/api/dashboard/analytics');
       }
@@ -180,24 +178,25 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
 
   const createApiKey = async () => {
     if (!newKeyName.trim()) return;
-    
+
     try {
       setCreating(true);
       const response = await fetch('/api/dashboard/api-keys', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: newKeyName.trim(), 
-          monthlyQuota: newKeyQuota 
+        body: JSON.stringify({
+          name: newKeyName.trim(),
+          monthlyQuota: newKeyQuota
         })
       });
-      
+
       if (response.ok) {
         const data = await response.json() as { secretKey: string };
         setShowNewKey(data.secretKey);
         setNewKeyName("");
         setNewKeyQuota(5000);
         mutate('/api/dashboard/api-keys');
+        setIsCreateDialogOpen(false);
       }
     } catch (error) {
       console.error('Failed to create API key:', error);
@@ -208,15 +207,9 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
 
   const deleteApiKey = async (keyId: string) => {
     if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) return;
-    
     try {
-      const response = await fetch(`/api/dashboard/api-keys/${keyId}`, {
-        method: 'DELETE'
-      });
-      
-      if (response.ok) {
-        mutate('/api/dashboard/api-keys');
-      }
+      const response = await fetch(`/api/dashboard/api-keys/${keyId}`, { method: 'DELETE' });
+      if (response.ok) mutate('/api/dashboard/api-keys');
     } catch (error) {
       console.error('Failed to delete API key:', error);
     }
@@ -228,31 +221,34 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
 
   const toggleKeyVisibility = (keyId: string) => {
     const newVisible = new Set(visibleKeys);
-    if (newVisible.has(keyId)) {
-      newVisible.delete(keyId);
-    } else {
-      newVisible.add(keyId);
-    }
+    if (newVisible.has(keyId)) newVisible.delete(keyId);
+    else newVisible.add(keyId);
     setVisibleKeys(newVisible);
   };
 
-
+  const handleTabChange = (v: Section) => {
+    setActiveTab(v);
+    if (pathname?.startsWith("/dashboard/")) {
+      router.replace(`/dashboard/${v}`, { scroll: false });
+    } else {
+      const params = new URLSearchParams(searchParams ?? undefined);
+      params.set("tab", v);
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    }
+  };
 
   if (!user) {
     return (
       <div className="container mx-auto py-8 px-4">
         <div className="max-w-2xl mx-auto text-center">
-          <h1 className="text-3xl font-bold mb-4">API Dashboard</h1>
-          <p className="text-muted-foreground mb-6">
-            Please sign in to access your API dashboard
-          </p>
+          <Title as="h1" className="text-3xl font-bold mb-4">API Dashboard</Title>
+          <Text className="text-muted-foreground mb-6">Please sign in to access your API dashboard</Text>
           <AuthButtons />
         </div>
       </div>
     );
   }
 
-  // Page header details per section
   const header = {
     overview: { title: "Overview", desc: "Usage analytics and key highlights.", icon: BarChart3 },
     keys: { title: "API Keys", desc: "Create and manage your API keys.", icon: Key },
@@ -272,8 +268,8 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
               <header.icon className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight leading-tight">{header.title}</h1>
-              <p className="text-sm text-muted-foreground">{header.desc}</p>
+              <Title as="h1" className="text-2xl font-semibold tracking-tight leading-tight">{header.title}</Title>
+              <Text className="text-sm text-muted-foreground">{header.desc}</Text>
             </div>
           </div>
           <AuthButtons />
@@ -284,526 +280,341 @@ export function DashboardClient({ section }: { section?: Section } = {}) {
             <Loader2 className="w-8 h-8 animate-spin" />
           </div>
         ) : (
-          <Tabs
-            value={activeTab}
-            onValueChange={(val: string) => {
-              const v = (val as Section);
-              setActiveTab(v);
-              // If on dedicated section page, navigate to the route;
-              // otherwise, keep query param for backward compatibility.
-              if (pathname?.startsWith("/dashboard/")) {
-                router.replace(`/dashboard/${v}`, { scroll: false });
-              } else {
-                const params = new URLSearchParams(searchParams ?? undefined);
-                params.set("tab", v);
-                router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-              }
-            }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             {!section && (
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="keys">API Keys</TabsTrigger>
-                <TabsTrigger value="playground">Playground</TabsTrigger>
-                <TabsTrigger value="personal-lists">Personal Lists</TabsTrigger>
-                <TabsTrigger value="docs">Documentation</TabsTrigger>
-              </TabsList>
+              <div className="flex space-x-1 bg-muted/50 p-1 rounded-lg overflow-x-auto">
+                {(["overview", "keys", "playground", "personal-lists", "docs"] as Section[]).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => handleTabChange(tab)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                      }`}
+                  >
+                    {tab === "personal-lists" ? "Personal Lists" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </div>
             )}
 
             {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-            {/* Quick Metrics - minimal row */}
-            <div className="rounded-xl border border-border/50 overflow-hidden">
-              <div className="grid grid-cols-2 md:grid-cols-4">
-                <div className="p-4 flex items-center gap-3">
-                  <User className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <div className="text-xs text-muted-foreground">Account</div>
-                    <div className="text-sm font-medium">{user.displayName || 'User'}</div>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center gap-3 border-t md:border-t-0 md:border-l border-border/50">
-                  <Key className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <div className="text-xs text-muted-foreground">API Keys</div>
-                    <div className="text-sm font-medium">{apiKeys.length} active</div>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center gap-3 border-t md:border-l border-border/50">
-                  <BarChart3 className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <div className="text-xs text-muted-foreground">This Month</div>
-                    <div className="text-sm font-medium">{apiStats?.totalRequests || 0} req</div>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center gap-3 border-t md:border-l border-border/50">
-                  <Clock className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <div className="text-xs text-muted-foreground">Avg Response</div>
-                    <div className="text-sm font-medium">{apiStats?.averageResponseTime || 0}ms</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* (Moved) API Keys section is now rendered in a dedicated tab below */}
-
-            {/* Analytics - minimal */}
-            {apiStats && (
-              <section aria-labelledby="analytics" className="space-y-3">
-                <h3 id="analytics" className="text-base font-semibold flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-muted-foreground" />
-                  Usage Analytics
-                </h3>
-                <div className="rounded-xl border border-border/50 overflow-hidden">
+            {activeTab === "overview" && (
+              <div className="space-y-6">
+                <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
                   <div className="grid grid-cols-2 md:grid-cols-4">
-                    <div className="p-4">
-                      <div className="text-xs text-muted-foreground">Total Requests</div>
-                      <div className="text-lg font-semibold">{apiStats.totalRequests}</div>
-                    </div>
-                    <div className="p-4 border-t md:border-t-0 md:border-l border-border/50">
-                      <div className="text-xs text-muted-foreground">Successful</div>
-                      <div className="text-lg font-semibold text-green-500">{apiStats.successfulRequests}</div>
-                    </div>
-                    <div className="p-4 border-t md:border-l border-border/50">
-                      <div className="text-xs text-muted-foreground">Failed</div>
-                      <div className="text-lg font-semibold text-red-500">{apiStats.errorRequests}</div>
-                    </div>
-                    <div className="p-4 border-t md:border-l border-border/50">
-                      <div className="text-xs text-muted-foreground">Avg Response</div>
-                      <div className="text-lg font-semibold">{apiStats.averageResponseTime}ms</div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-t border-border/50">
-                    {/* Daily usage line chart */}
-                    <div className="col-span-2 h-56 rounded-md bg-background">
-                      {apiStats.dailyUsage && apiStats.dailyUsage.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={apiStats.dailyUsage} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
-                            <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
-                            <XAxis
-                              dataKey="date"
-                              tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }}
-                              tickFormatter={(d) => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                              axisLine={false}
-                              tickLine={false}
-                            />
-                            <YAxis tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                            <ReTooltip
-                              contentStyle={{ background: '#0a0a0a', border: '1px solid #2f3336', borderRadius: 8 }}
-                              labelFormatter={(d) => new Date(d as string).toLocaleDateString()}
-                            />
-                            <Line type="monotone" dataKey="count" stroke="#1a8cd8" strokeWidth={2} dot={false} />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      ) : (
-                        <div className="h-full grid place-items-center text-xs text-muted-foreground">No daily data</div>
-                      )}
-                    </div>
-
-                    {/* Success vs Error bar */}
-                    <div className="h-56 rounded-md bg-background">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={[{ name: 'Requests', success: apiStats.successfulRequests, error: apiStats.errorRequests }]}
-                          margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
-                          <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
-                          <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} />
-                          <YAxis tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} allowDecimals={false} />
-                          <ReTooltip contentStyle={{ background: '#0a0a0a', border: '1px solid #2f3336', borderRadius: 8 }} />
-                          <Bar dataKey="success" fill="#16a34a" radius={[4,4,0,0]} />
-                          <Bar dataKey="error" fill="#ef4444" radius={[4,4,0,0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                  <div className="p-4 border-t border-border/50">
-                    <h4 className="text-sm font-medium mb-3">Top Endpoints</h4>
-                    <div className="space-y-2">
-                      {(apiStats.endpointUsage || apiStats.topEndpoints || []).slice(0, 5).map((endpoint) => {
-                        const count = 'count' in endpoint ? endpoint.count : 'requests' in endpoint ? endpoint.requests : 0;
-                        return (
-                          <div key={endpoint.endpoint} className="flex items-center justify-between text-sm">
-                            <code className="text-xs bg-muted/50 px-2 py-1 rounded">{endpoint.endpoint}</code>
-                            <span className="font-medium">{count}</span>
-                          </div>
-                        );
-                      })}
-                      {(!apiStats.endpointUsage && !apiStats.topEndpoints) && (
-                        <p className="text-sm text-muted-foreground">No endpoint data available</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-            </TabsContent>
-
-            {/* API Keys Tab */}
-            <TabsContent value="keys" className="space-y-6">
-              <section aria-labelledby="keys" className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 id="keys" className="text-base font-semibold">API Keys</h3>
-                  <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="sm" className="rounded-full px-4">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create Key
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Create New API Key</DialogTitle>
-                        <DialogDescription>
-                          Create a new API key to access the TruMailer API v2
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor="keyName">Key Name</Label>
-                          <Input
-                            id="keyName"
-                            value={newKeyName}
-                            onChange={(e) => setNewKeyName(e.target.value)}
-                            placeholder="e.g. Production API Key"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="keyQuota">Monthly Quota</Label>
-                          <Input
-                            id="keyQuota"
-                            type="number"
-                            value={newKeyQuota}
-                            onChange={(e) => setNewKeyQuota(parseInt(e.target.value) || 5000)}
-                            min={1000}
-                            max={100000}
-                          />
-                        </div>
-                        <Button 
-                          onClick={createApiKey} 
-                          disabled={creating || !newKeyName.trim()}
-                          className="w-full"
-                        >
-                          {creating ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <Plus className="w-4 h-4 mr-2" />
-                          )}
-                          Create API Key
-                        </Button>
+                    <div className="p-4 flex items-center gap-3">
+                      <User className="w-5 h-5 text-muted-foreground" />
+                      <div>
+                        <Text className="text-xs text-muted-foreground">Account</Text>
+                        <Text className="text-sm font-medium">{user.displayName || 'User'}</Text>
                       </div>
-                    </DialogContent>
-                  </Dialog>
+                    </div>
+                    <div className="p-4 flex items-center gap-3 border-t md:border-t-0 md:border-l border-primary/10">
+                      <Key className="w-5 h-5 text-muted-foreground" />
+                      <div>
+                        <Text className="text-xs text-muted-foreground">API Keys</Text>
+                        <Text className="text-sm font-medium">{apiKeys.length} active</Text>
+                      </div>
+                    </div>
+                    <div className="p-4 flex items-center gap-3 border-t md:border-l border-primary/10">
+                      <BarChart3 className="w-5 h-5 text-muted-foreground" />
+                      <div>
+                        <Text className="text-xs text-muted-foreground">This Month</Text>
+                        <Text className="text-sm font-medium">{apiStats?.totalRequests || 0} req</Text>
+                      </div>
+                    </div>
+                    <div className="p-4 flex items-center gap-3 border-t md:border-l border-primary/10">
+                      <Clock className="w-5 h-5 text-muted-foreground" />
+                      <div>
+                        <Text className="text-xs text-muted-foreground">Avg Response</Text>
+                        <Text className="text-sm font-medium">{apiStats?.averageResponseTime || 0}ms</Text>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {showNewKey && (
-                  <div className="rounded-lg border border-border/50 p-3 bg-muted/40">
-                    <p className="text-xs text-muted-foreground mb-2">
-                      New API key created. Copy and store it securely.
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 bg-background px-3 py-2 rounded border border-border/50 text-xs overflow-x-auto">
-                        {showNewKey}
-                      </code>
-                      <Button size="sm" variant="outline" onClick={() => copyToClipboard(showNewKey)} className="rounded-full px-3">
-                        <Copy className="w-4 h-4" />
-                      </Button>
+                {apiStats && (
+                  <section aria-labelledby="analytics" className="space-y-3">
+                    <Title as="h3" id="analytics" className="text-base font-semibold flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-muted-foreground" />
+                      Usage Analytics
+                    </Title>
+                    <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
+                      <div className="grid grid-cols-2 md:grid-cols-4">
+                        <div className="p-4">
+                          <Text className="text-xs text-muted-foreground">Total Requests</Text>
+                          <Text className="text-lg font-semibold">{apiStats.totalRequests}</Text>
+                        </div>
+                        <div className="p-4 border-t md:border-t-0 md:border-l border-primary/10">
+                          <Text className="text-xs text-muted-foreground">Successful</Text>
+                          <Text className="text-lg font-semibold text-green-500">{apiStats.successfulRequests}</Text>
+                        </div>
+                        <div className="p-4 border-t md:border-l border-primary/10">
+                          <Text className="text-xs text-muted-foreground">Failed</Text>
+                          <Text className="text-lg font-semibold text-red-500">{apiStats.errorRequests}</Text>
+                        </div>
+                        <div className="p-4 border-t md:border-l border-primary/10">
+                          <Text className="text-xs text-muted-foreground">Avg Response</Text>
+                          <Text className="text-lg font-semibold">{apiStats.averageResponseTime}ms</Text>
+                        </div>
+                      </div>
+                      {/* Charts section kept as div structure for Recharts responsiveness */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-t border-primary/10">
+                        <div className="col-span-2 h-56 rounded-md bg-background/50">
+                          {apiStats.dailyUsage && apiStats.dailyUsage.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                              <LineChart data={apiStats.dailyUsage} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+                                <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                                <XAxis
+                                  dataKey="date"
+                                  tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }}
+                                  tickFormatter={(d) => new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                  axisLine={false}
+                                  tickLine={false}
+                                />
+                                <YAxis tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                                <ReTooltip
+                                  contentStyle={{ background: '#0a0a0a', border: '1px solid #2f3336', borderRadius: 8 }}
+                                  labelFormatter={(d) => new Date(d as string).toLocaleDateString()}
+                                />
+                                <Line type="monotone" dataKey="count" stroke="#1a8cd8" strokeWidth={2} dot={false} />
+                              </LineChart>
+                            </ResponsiveContainer>
+                          ) : (
+                            <div className="h-full grid place-items-center text-xs text-muted-foreground">No daily data</div>
+                          )}
+                        </div>
+
+                        <div className="h-56 rounded-md bg-background/50">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={[{ name: 'Requests', success: apiStats.successfulRequests, error: apiStats.errorRequests }]}
+                              margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
+                              <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+                              <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} />
+                              <YAxis tick={{ fontSize: 11, fill: 'rgba(230,233,239,0.7)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                              <ReTooltip contentStyle={{ background: '#0a0a0a', border: '1px solid #2f3336', borderRadius: 8 }} />
+                              <Bar dataKey="success" fill="#16a34a" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="error" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+                      <div className="p-4 border-t border-primary/10">
+                        <Title as="h4" className="text-sm font-medium mb-3">Top Endpoints</Title>
+                        <div className="space-y-2">
+                          {(apiStats.endpointUsage || apiStats.topEndpoints || []).slice(0, 5).map((endpoint) => {
+                            const count = 'count' in endpoint ? endpoint.count : 'requests' in endpoint ? endpoint.requests : 0;
+                            return (
+                              <div key={endpoint.endpoint} className="flex items-center justify-between text-sm">
+                                <code className="text-xs bg-muted/50 px-2 py-1 rounded">{endpoint.endpoint}</code>
+                                <span className="font-medium">{count}</span>
+                              </div>
+                            );
+                          })}
+                          {(!apiStats.endpointUsage && !apiStats.topEndpoints) && (
+                            <Text className="text-sm text-muted-foreground">No endpoint data available</Text>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <Button size="sm" variant="ghost" onClick={() => setShowNewKey("")} className="mt-2 text-muted-foreground">
-                      Dismiss
+                  </section>
+                )}
+              </div>
+            )}
+
+            {activeTab === "keys" && (
+              <div className="space-y-6">
+                <section aria-labelledby="keys" className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Title as="h3" id="keys" className="text-base font-semibold">API Keys</Title>
+                    <Button size="sm" className="rounded-full px-4" onClick={() => setIsCreateDialogOpen(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Key
                     </Button>
                   </div>
-                )}
 
-                {apiKeys.length === 0 ? (
-                  <div className="rounded-xl border border-border/50 p-6 text-center">
-                    <p className="text-sm text-muted-foreground">No API keys yet</p>
-                    <p className="text-xs text-muted-foreground">Create your first API key to start.</p>
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-border/50 overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Key</TableHead>
-                          <TableHead>Usage</TableHead>
-                          <TableHead>Created</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {apiKeys.map((key) => (
-                          <TableRow key={key.id}>
-                            <TableCell className="max-w-[220px] truncate font-medium">{key.name}</TableCell>
-                            <TableCell>
-                              <code className="bg-muted/50 px-2 py-1 rounded text-xs">
-                                {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
-                              </code>
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground">
-                              {key.currentUsage}/{key.monthlyQuota}
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground">
-                              {new Date(key.createdAt).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={key.isActive ? "default" : "secondary"}>
-                                {key.isActive ? "Active" : "Inactive"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-1">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8"
-                                  onClick={() => toggleKeyVisibility(key.id)}
-                                  aria-label={visibleKeys.has(key.id) ? 'Hide key' : 'Show key'}
-                                >
-                                  {visibleKeys.has(key.id) ? (
-                                    <EyeOff className="w-4 h-4" />
-                                  ) : (
-                                    <Eye className="w-4 h-4" />
-                                  )}
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8"
-                                  onClick={() => copyToClipboard(key.keyPreview)}
-                                  aria-label="Copy key"
-                                >
-                                  <Copy className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8 text-red-500 hover:text-red-500"
-                                  onClick={() => deleteApiKey(key.id)}
-                                  aria-label="Delete key"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </section>
-            </TabsContent>
-
-            {/* Playground Tab */}
-            <TabsContent value="playground" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Play className="w-5 h-5" />
-                    Validation Playground
-                  </CardTitle>
-                  <CardDescription>
-                    Test your API keys with live email validation
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label htmlFor="playground-api-key">API Key</Label>
-                      <Input
-                        id="playground-api-key"
-                        type="password"
-                        value={playgroundApiKey}
-                        onChange={(e) => setPlaygroundApiKey(e.target.value)}
-                        placeholder="tm_your_api_key_here"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="playground-email">Email to Test</Label>
-                      <Input
-                        id="playground-email"
-                        value={playgroundEmail}
-                        onChange={(e) => setPlaygroundEmail(e.target.value)}
-                        placeholder="xepeg24004@100likers.com"
-                      />
-                    </div>
-                  </div>
-                  
-                  <Button
-                    onClick={() => trigger({ email: playgroundEmail, apiKey: playgroundApiKey })}
-                    disabled={isMutating}
-                    className="w-full"
-                    aria-controls="playground-result"
-                    aria-busy={isMutating}
-                  >
-                    {isMutating ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Play className="w-4 h-4 mr-2" />
-                    )}
-                    Validate
-                  </Button>
-                  <div className="text-xs text-muted-foreground">We never store your API key.</div>
-
-                  {playgroundResult && (
-                    <div className="mt-6" id="playground-result" role="region" aria-live="polite">
-                      <h4 className="text-sm font-medium mb-3">Validation Results</h4>
-                      {/* Summary badges */}
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <Badge variant={playgroundResult.valid ? 'default' : 'destructive'}>
-                          {playgroundResult.valid ? 'Valid' : 'Invalid'}
-                        </Badge>
-                        <Badge variant={playgroundResult.syntax_valid ? 'secondary' : 'destructive'}>
-                          Syntax {playgroundResult.syntax_valid ? 'OK' : 'Error'}
-                        </Badge>
-                        {typeof playgroundResult.disposable === 'boolean' && (
-                          <Badge variant={playgroundResult.disposable ? 'destructive' : 'secondary'}>
-                            {playgroundResult.disposable ? 'Disposable' : 'Not disposable'}
-                          </Badge>
-                        )}
-                        {typeof playgroundResult.mx_records === 'boolean' && (
-                          <Badge variant={playgroundResult.mx_records ? 'default' : 'secondary'}>
-                            MX {playgroundResult.mx_records ? 'present' : 'missing'}
-                          </Badge>
-                        )}
-                        {typeof playgroundResult.role_based === 'boolean' && (
-                          <Badge variant={playgroundResult.role_based ? 'secondary' : 'default'}>
-                            {playgroundResult.role_based ? 'Role-based' : 'Personal'}
-                          </Badge>
-                        )}
-                        {playgroundResult.risk_level && (
-                          <Badge variant={playgroundResult.risk_level === 'low' ? 'default' : playgroundResult.risk_level === 'medium' ? 'secondary' : 'destructive'}>
-                            {playgroundResult.risk_level}
-                          </Badge>
-                        )}
-                        {typeof playgroundResult.confidence_score === 'number' && (
-                          <Badge variant="outline">{Math.round(playgroundResult.confidence_score * 100)}% confidence</Badge>
-                        )}
+                  <Modal isOpen={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)}>
+                    <div className="p-6">
+                      <div className="flex flex-col space-y-1.5 text-center sm:text-left mb-4">
+                        <Title as="h3" className="text-lg font-semibold leading-none tracking-tight">Create New API Key</Title>
+                        <Text className="text-sm text-muted-foreground">Create a new API key to access the TruMailer API v2</Text>
                       </div>
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Valid:</span>
-                            <Badge variant={playgroundResult.valid ? "default" : "destructive"}>
-                              {playgroundResult.valid ? "Yes" : "No"}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Syntax Valid:</span>
-                            <Badge variant={playgroundResult.syntax_valid ? "default" : "destructive"}>
-                              {playgroundResult.syntax_valid ? "Yes" : "No"}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Disposable:</span>
-                            <Badge variant={playgroundResult.disposable ? "destructive" : "default"}>
-                              {playgroundResult.disposable === null ? "Unknown" : playgroundResult.disposable ? "Yes" : "No"}
-                            </Badge>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Role-based:</span>
-                            <Badge variant={playgroundResult.role_based ? "secondary" : "default"}>
-                              {playgroundResult.role_based === null ? "Unknown" : playgroundResult.role_based ? "Yes" : "No"}
-                            </Badge>
-                          </div>
-                          {playgroundResult.spammy !== undefined && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">Spammy:</span>
-                              <Badge variant={playgroundResult.spammy ? "destructive" : "default"}>
-                                {playgroundResult.spammy ? "Yes" : "No"}
-                              </Badge>
-                            </div>
-                          )}
-                          {playgroundResult.allowed_list !== undefined && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">Allowed List:</span>
-                              <Badge variant={playgroundResult.allowed_list ? "default" : "secondary"}>
-                                {playgroundResult.allowed_list ? "Yes" : "No"}
-                              </Badge>
-                            </div>
-                          )}
-                          {playgroundResult.confidence_score !== undefined && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">Confidence Score:</span>
-                              <Badge variant={playgroundResult.confidence_score > 0.7 ? "default" : playgroundResult.confidence_score > 0.4 ? "secondary" : "destructive"}>
-                                {(playgroundResult.confidence_score * 100).toFixed(0)}%
-                              </Badge>
-                            </div>
-                          )}
-                          {playgroundResult.risk_level && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">Risk Level:</span>
-                              <Badge variant={playgroundResult.risk_level === 'low' ? "default" : playgroundResult.risk_level === 'medium' ? "secondary" : "destructive"}>
-                                {playgroundResult.risk_level.charAt(0).toUpperCase() + playgroundResult.risk_level.slice(1)}
-                              </Badge>
-                            </div>
-                          )}
-                          {playgroundResult.personal_override && (
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">Personal Override:</span>
-                              <Badge variant="outline">
-                                Active
-                              </Badge>
-                            </div>
-                          )}
+                      <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium leading-none">Key Name</label>
+                          <Input value={newKeyName} onChange={(e) => setNewKeyName(e.target.value)} placeholder="e.g. Production API Key" />
                         </div>
-                        <div className="space-y-3">
-                          <div>
-                            <h5 className="text-sm font-medium mb-2">Reason</h5>
-                            <p className="text-xs bg-muted p-2 rounded">{playgroundResult.reason}</p>
-                          </div>
-                          
-                          {playgroundResult.suggestions && playgroundResult.suggestions.length > 0 && (
-                            <div>
-                              <h5 className="text-sm font-medium mb-2">Suggestions</h5>
-                              <div className="space-y-1">
-                                {playgroundResult.suggestions.map((suggestion, index) => (
-                                  <p key={index} className="text-xs bg-muted p-2 rounded">
-                                    • {suggestion}
-                                  </p>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium leading-none">Monthly Quota</label>
+                          <Input type="number" value={newKeyQuota} onChange={(e) => setNewKeyQuota(parseInt(e.target.value) || 5000)} min={1000} max={100000} />
+                        </div>
+                      </div>
+                      <Button onClick={createApiKey} disabled={creating || !newKeyName.trim()} className="w-full">
+                        {creating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                        Create API Key
+                      </Button>
+                    </div>
+                  </Modal>
 
-                          {playgroundResult.cache_info && (
-                            <div>
-                              <h5 className="text-sm font-medium mb-2">Cache Info</h5>
-                              <div className="text-xs bg-muted p-2 rounded space-y-1">
-                                <p>Disposable domains: {playgroundResult.cache_info.disposable_domains_count.toLocaleString()}</p>
-                                <p>Allowed domains: {playgroundResult.cache_info.allowed_domains_count.toLocaleString()}</p>
-                                <p>Last updated: {new Date(playgroundResult.cache_info.last_updated).toLocaleString()}</p>
-                              </div>
-                            </div>
-                          )}
-                          
-                          <div>
-                            <h5 className="text-sm font-medium mb-2">Raw Response</h5>
-                            <pre className="text-xs bg-muted p-3 rounded overflow-auto max-h-60">
-                              {JSON.stringify(playgroundResult, null, 2)}
-                            </pre>
-                          </div>
-                        </div>
+                  {showNewKey && (
+                    <div className="rounded-lg border border-border/50 p-3 bg-muted/40">
+                      <Text className="text-xs text-muted-foreground mb-2">New API key created. Copy and store it securely.</Text>
+                      <div className="flex items-center gap-2">
+                        <code className="flex-1 bg-background px-3 py-2 rounded border border-border/50 text-xs overflow-x-auto">{showNewKey}</code>
+                        <ActionIcon size="sm" variant="outline" onClick={() => copyToClipboard(showNewKey)} className="rounded-full">
+                          <Copy className="w-4 h-4" />
+                        </ActionIcon>
+                      </div>
+                      <Button size="sm" variant="text" onClick={() => setShowNewKey("")} className="mt-2 text-muted-foreground">Dismiss</Button>
+                    </div>
+                  )}
+
+                  {apiKeys.length === 0 ? (
+                    <div className="bg-card/50 border border-primary/20 rounded-xl p-6 text-center">
+                      <Text className="text-sm text-muted-foreground">No API keys yet</Text>
+                      <Text className="text-xs text-muted-foreground">Create your first API key to start.</Text>
+                    </div>
+                  ) : (
+                    <div className="bg-card/50 border border-primary/20 rounded-xl overflow-hidden">
+                      <div className="relative w-full overflow-auto">
+                        <table className="w-full caption-bottom text-sm">
+                          <thead className="[&_tr]:border-b [&_tr]:border-primary/10">
+                            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Key</th>
+                              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Usage</th>
+                              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Created</th>
+                              <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                              <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="[&_tr:last-child]:border-0">
+                            {apiKeys.map((key) => (
+                              <tr key={key.id} className="border-b border-primary/10 transition-colors hover:bg-muted/50">
+                                <td className="p-4 align-middle font-medium">{key.name}</td>
+                                <td className="p-4 align-middle">
+                                  <code className="bg-muted/50 px-2 py-1 rounded text-xs">
+                                    {visibleKeys.has(key.id) ? key.keyPreview : '•'.repeat(32)}
+                                  </code>
+                                </td>
+                                <td className="p-4 align-middle text-muted-foreground">
+                                  {key.currentUsage}/{key.monthlyQuota}
+                                </td>
+                                <td className="p-4 align-middle text-muted-foreground">
+                                  {new Date(key.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="p-4 align-middle">
+                                  <Badge
+                                    color={key.isActive ? "success" : "secondary"}
+                                    variant="flat"
+                                  >
+                                    {key.isActive ? "Active" : "Inactive"}
+                                  </Badge>
+                                </td>
+                                <td className="p-4 align-middle text-right">
+                                  <div className="flex justify-end gap-1">
+                                    <ActionIcon size="sm" variant="text" onClick={() => toggleKeyVisibility(key.id)}>
+                                      {visibleKeys.has(key.id) ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </ActionIcon>
+                                    <ActionIcon size="sm" variant="text" onClick={() => copyToClipboard(key.keyPreview)}>
+                                      <Copy className="w-4 h-4" />
+                                    </ActionIcon>
+                                    <ActionIcon size="sm" variant="text" className="text-red-500 hover:text-red-700" onClick={() => deleteApiKey(key.id)}>
+                                      <Trash2 className="w-4 h-4" />
+                                    </ActionIcon>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </section>
+              </div>
+            )}
 
-            {/* Personal Lists Tab */}
-            <TabsContent value="personal-lists" className="space-y-6">
-              <PersonalListsClient />
-            </TabsContent>
+            {activeTab === "playground" && (
+              <div className="space-y-6">
+                <div className="bg-card/50 border border-primary/20 rounded-xl">
+                  <div className="p-6 border-b border-primary/10">
+                    <div className="flex items-center gap-2">
+                      <Play className="w-5 h-5 text-primary" />
+                      <div>
+                        <Title as="h3" className="text-xl font-bold">Validation Playground</Title>
+                        <Text className="text-sm text-muted-foreground">Test your API keys with live email validation</Text>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-6 space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">API Key</label>
+                        <Password
+                          value={playgroundApiKey}
+                          onChange={(e) => setPlaygroundApiKey(e.target.value)}
+                          placeholder="tm_your_api_key_here"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">Email to Test</label>
+                        <Input
+                          value={playgroundEmail}
+                          onChange={(e) => setPlaygroundEmail(e.target.value)}
+                          placeholder="xepeg24004@100likers.com"
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => trigger({ email: playgroundEmail, apiKey: playgroundApiKey })}
+                      disabled={isMutating}
+                      className="w-full"
+                    >
+                      {isMutating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
+                      Validate
+                    </Button>
+                    <Text className="text-xs text-muted-foreground">We never store your API key.</Text>
 
-            {/* Documentation Tab */}
-            <TabsContent value="docs" className="space-y-6">
-              <DocsClient />
-            </TabsContent>
-          </Tabs>
+                    {playgroundResult && (
+                      <div className="mt-6 border-t border-primary/10 pt-6">
+                        <Title as="h4" className="text-sm font-medium mb-3">Validation Results</Title>
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          <Badge color={playgroundResult.valid ? "success" : "danger"} variant="flat">
+                            {playgroundResult.valid ? 'Valid' : 'Invalid'}
+                          </Badge>
+                          <Badge variant="outline">
+                            Syntax {playgroundResult.syntax_valid ? 'OK' : 'Error'}
+                          </Badge>
+                          <Badge color={playgroundResult.risk_level === 'low' ? "success" : playgroundResult.risk_level === 'medium' ? "warning" : "danger"} variant="flat">
+                            Risk: {playgroundResult.risk_level}
+                          </Badge>
+                        </div>
+
+                        <div className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+                          <pre>{JSON.stringify(playgroundResult, null, 2)}</pre>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === "personal-lists" && (
+              <div className="space-y-6">
+                <PersonalListsClient />
+              </div>
+            )}
+
+            {activeTab === "docs" && (
+              <div className="space-y-6">
+                <DocsClient />
+              </div>
+            )}
+
+          </div>
         )}
       </div>
     </div>

@@ -2,10 +2,8 @@
 
 import { useUser } from "@stackframe/stack";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button, Badge, Title, Text } from "rizzui";
 import { CheckCircle, XCircle, Database, Users, Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import type { User } from "@/lib/db/schema";
 import Image from "next/image";
 
@@ -51,52 +49,61 @@ export default function DatabaseTestClient() {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Database Connection Test</h1>
-          <p className="text-muted-foreground">Testing Turso database connection and user sync functionality</p>
+          <Title as="h1" className="text-3xl font-bold mb-4">Database Connection Test</Title>
+          <Text className="text-muted-foreground">Testing Turso database connection and user sync functionality</Text>
         </div>
 
-        <Card className="mb-6">
-          <CardHeader><CardTitle className="flex items-center gap-2"><Database className="w-5 h-5" />Database Status</CardTitle></CardHeader>
-          <CardContent>
+        <div className="bg-card/50 border border-primary/20 rounded-xl mb-6">
+          <div className="p-6 border-b border-primary/10">
+            <Title as="h2" className="flex items-center gap-2"><Database className="w-5 h-5" />Database Status</Title>
+          </div>
+          <div className="p-6">
             {loading ? (
               <div className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Checking database connection...</div>
             ) : error ? (
-              <div className="flex items-center gap-2 text-red-600"><XCircle className="w-5 h-5" /><Badge variant="destructive">Error</Badge><span className="text-sm">{error}</span></div>
+              <div className="flex items-center gap-2 text-red-600"><XCircle className="w-5 h-5" /><Badge color="danger" variant="flat">Error</Badge><Text className="text-sm">{error}</Text></div>
             ) : (
-              <div className="flex items-center gap-2 text-green-600"><CheckCircle className="w-5 h-5" /><Badge variant="default">Connected</Badge><span className="text-sm">Turso database is operational</span></div>
+              <div className="flex items-center gap-2 text-green-600"><CheckCircle className="w-5 h-5" /><Badge color="success" variant="flat">Connected</Badge><Text className="text-sm">Turso database is operational</Text></div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {dbStats && (
           <div className="grid gap-6 md:grid-cols-2 mb-6">
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />User Statistics</CardTitle></CardHeader>
-              <CardContent>
+            <div className="bg-card/50 border border-primary/20 rounded-xl">
+              <div className="p-6 border-b border-primary/10">
+                <Title as="h2" className="flex items-center gap-2"><Users className="w-5 h-5" />User Statistics</Title>
+              </div>
+              <div className="p-6">
                 <div className="space-y-2">
-                  <div className="flex justify-between"><span>Current User in DB:</span><Badge variant={dbStats.latestUser ? "default" : "secondary"}>{dbStats.latestUser ? "Synced" : "Not Synced"}</Badge></div>
+                  <div className="flex justify-between"><span>Current User in DB:</span><Badge color={dbStats.latestUser ? "success" : "secondary"} variant="flat">{dbStats.latestUser ? "Synced" : "Not Synced"}</Badge></div>
                   {dbStats.latestUser && (
                     <div className="text-sm text-muted-foreground"><p>ID: {dbStats.latestUser.id}</p><p>Email: {dbStats.latestUser.email}</p><p>Name: {dbStats.latestUser.displayName || "Not set"}</p></div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Database className="w-5 h-5" />Todos Statistics</CardTitle></CardHeader>
-              <CardContent>
+              </div>
+            </div>
+            <div className="bg-card/50 border border-primary/20 rounded-xl">
+              <div className="p-6 border-b border-primary/10">
+                <Title as="h2" className="flex items-center gap-2"><Database className="w-5 h-5" />Todos Statistics</Title>
+              </div>
+              <div className="p-6">
                 <div className="space-y-2">
                   <div className="flex justify-between"><span>Total Todos:</span><Badge variant="outline">{dbStats.totalTodos}</Badge></div>
                   <div className="text-sm text-muted-foreground">Visit <code>/todo</code> to test CRUD operations</div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
 
         {user ? (
-          <Card className="mb-6">
-            <CardHeader><CardTitle>Current User</CardTitle><CardDescription>StackAuth user information and sync status</CardDescription></CardHeader>
-            <CardContent>
+          <div className="bg-card/50 border border-primary/20 rounded-xl mb-6">
+            <div className="p-6 border-b border-primary/10">
+              <Title as="h2">Current User</Title>
+              <Text className="text-sm text-muted-foreground">StackAuth user information and sync status</Text>
+            </div>
+            <div className="p-6">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   {user.profileImageUrl && (
@@ -115,21 +122,31 @@ export default function DatabaseTestClient() {
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ) : (
-          <Card className="mb-6"><CardHeader><CardTitle>Authentication Required</CardTitle><CardDescription>Please sign in to test database sync functionality</CardDescription></CardHeader><CardContent><p className="text-muted-foreground">Sign in to see automatic user sync in action</p></CardContent></Card>
+          <div className="bg-card/50 border border-primary/20 rounded-xl mb-6">
+            <div className="p-6 border-b border-primary/10">
+              <Title as="h2">Authentication Required</Title>
+              <Text className="text-sm text-muted-foreground">Please sign in to test database sync functionality</Text>
+            </div>
+            <div className="p-6">
+              <Text className="text-muted-foreground">Sign in to see automatic user sync in action</Text>
+            </div>
+          </div>
         )}
 
-        <Card>
-          <CardHeader><CardTitle>Manual Actions</CardTitle></CardHeader>
-          <CardContent>
+        <div className="bg-card/50 border border-primary/20 rounded-xl">
+          <div className="p-6 border-b border-primary/10">
+            <Title as="h2">Manual Actions</Title>
+          </div>
+          <div className="p-6">
             <div className="flex gap-2">
               <Button onClick={fetchDbStats} disabled={loading} variant="outline" className="flex items-center gap-2">{loading ? (<Loader2 className="w-4 h-4 animate-spin" />) : (<Database className="w-4 h-4" />)}Refresh Stats</Button>
-              <Button onClick={handleMigrateApiTables} variant="secondary" className="flex items-center gap-2"><Database className="w-4 h-4" />Migrate API Tables</Button>
+              <Button onClick={handleMigrateApiTables} color="secondary" className="flex items-center gap-2"><Database className="w-4 h-4" />Migrate API Tables</Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

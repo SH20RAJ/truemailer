@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button, Input, Textarea, Badge } from "rizzui";
 import { ArrowLeft, ThumbsUp, ThumbsDown, AlertTriangle, CheckCircle, Users } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@stackframe/stack";
@@ -80,7 +75,7 @@ export function HelpImproveClient() {
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center gap-4">
                         <Link href="/">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="text" size="sm">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
                                 Back to Home
                             </Button>
@@ -104,158 +99,120 @@ export function HelpImproveClient() {
                         exit={{ opacity: 0, y: -50 }}
                         className="fixed top-4 right-4 z-50"
                     >
-                        <Card className="bg-primary/10 border-primary/20">
-                            <CardContent className="p-4">
-                                <div className="flex items-center gap-3">
-                                    <CheckCircle className="h-5 w-5 text-primary" />
-                                    <div>
-                                        <p className="font-medium">Submission Received!</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            Your suggestion will be reviewed by our team within 24 hours.
-                                        </p>
-                                    </div>
+                        <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 shadow-lg">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="font-medium">Submission Received!</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Your suggestion will be reviewed by our team within 24 hours.
+                                    </p>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Submission Form */}
                     <div className="lg:col-span-2">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6 border-b border-primary/10">
+                                <div className="flex items-center gap-2 mb-2">
                                     <Users className="h-5 w-5" />
-                                    Submit Email/Domain Suggestion
-                                </CardTitle>
+                                    <h3 className="text-xl font-bold">Submit Email/Domain Suggestion</h3>
+                                </div>
                                 <p className="text-muted-foreground">
                                     Help us improve our validation accuracy by reporting spam domains or suggesting legitimate ones.
                                 </p>
-                            </CardHeader>
-                            <CardContent>
-                                <Tabs value={submissionType} onValueChange={(value) => setSubmissionType(value as "spam" | "allow")}>
-                                    <TabsList className="grid w-full grid-cols-2">
-                                        <TabsTrigger value="spam" className="flex items-center gap-2">
-                                            <AlertTriangle className="h-4 w-4" />
-                                            Report Spam
-                                        </TabsTrigger>
-                                        <TabsTrigger value="allow" className="flex items-center gap-2">
-                                            <CheckCircle className="h-4 w-4" />
-                                            Suggest Allow
-                                        </TabsTrigger>
-                                    </TabsList>
+                            </div>
+                            <div className="p-6">
+                                {/* Custom Tabs */}
+                                <div className="grid grid-cols-2 bg-muted p-1 rounded-lg mb-6">
+                                    <button
+                                        onClick={() => setSubmissionType("spam")}
+                                        className={`flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all ${submissionType === "spam"
+                                                ? "bg-background shadow-sm text-foreground"
+                                                : "text-muted-foreground hover:text-foreground"
+                                            }`}
+                                    >
+                                        <AlertTriangle className="h-4 w-4" />
+                                        Report Spam
+                                    </button>
+                                    <button
+                                        onClick={() => setSubmissionType("allow")}
+                                        className={`flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all ${submissionType === "allow"
+                                                ? "bg-background shadow-sm text-foreground"
+                                                : "text-muted-foreground hover:text-foreground"
+                                            }`}
+                                    >
+                                        <CheckCircle className="h-4 w-4" />
+                                        Suggest Allow
+                                    </button>
+                                </div>
 
-                                    <TabsContent value="spam" className="mt-6">
-                                        <form onSubmit={handleSubmit} className="space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="text-sm font-medium mb-2 block">
-                                                        Email Address (optional)
-                                                    </label>
-                                                    <Input
-                                                        type="email"
-                                                        placeholder="spam@example.com"
-                                                        value={email}
-                                                        onChange={(e) => setEmail(e.target.value)}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-sm font-medium mb-2 block">
-                                                        Domain (optional)
-                                                    </label>
-                                                    <Input
-                                                        type="text"
-                                                        placeholder="spam-domain.com"
-                                                        value={domain}
-                                                        onChange={(e) => setDomain(e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium mb-2 block">
-                                                    Reason for reporting as spam *
-                                                </label>
-                                                <Textarea
-                                                    placeholder="Describe why this email/domain should be flagged as spam..."
-                                                    value={reason}
-                                                    onChange={(e) => setReason(e.target.value)}
-                                                    required
-                                                    rows={3}
-                                                />
-                                            </div>
-                                            <Button type="submit" className="w-full">
-                                                <AlertTriangle className="h-4 w-4 mr-2" />
-                                                Report as Spam
-                                            </Button>
-                                        </form>
-                                    </TabsContent>
-
-                                    <TabsContent value="allow" className="mt-6">
-                                        <form onSubmit={handleSubmit} className="space-y-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="text-sm font-medium mb-2 block">
-                                                        Email Address (optional)
-                                                    </label>
-                                                    <Input
-                                                        type="email"
-                                                        placeholder="legitimate@example.com"
-                                                        value={email}
-                                                        onChange={(e) => setEmail(e.target.value)}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="text-sm font-medium mb-2 block">
-                                                        Domain (optional)
-                                                    </label>
-                                                    <Input
-                                                        type="text"
-                                                        placeholder="legitimate-domain.com"
-                                                        value={domain}
-                                                        onChange={(e) => setDomain(e.target.value)}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="text-sm font-medium mb-2 block">
-                                                    Reason for allowlisting *
-                                                </label>
-                                                <Textarea
-                                                    placeholder="Describe why this email/domain should be allowed..."
-                                                    value={reason}
-                                                    onChange={(e) => setReason(e.target.value)}
-                                                    required
-                                                    rows={3}
-                                                />
-                                            </div>
-                                            <Button type="submit" className="w-full">
-                                                <CheckCircle className="h-4 w-4 mr-2" />
-                                                Suggest Allow
-                                            </Button>
-                                        </form>
-                                    </TabsContent>
-                                </Tabs>
-                            </CardContent>
-                        </Card>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-sm font-medium mb-2 block">
+                                                Email Address (optional)
+                                            </label>
+                                            <Input
+                                                type="email"
+                                                placeholder={submissionType === "spam" ? "spam@example.com" : "legitimate@example.com"}
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-sm font-medium mb-2 block">
+                                                Domain (optional)
+                                            </label>
+                                            <Input
+                                                type="text"
+                                                placeholder={submissionType === "spam" ? "spam-domain.com" : "legitimate-domain.com"}
+                                                value={domain}
+                                                onChange={(e) => setDomain(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-sm font-medium mb-2 block">
+                                            {submissionType === "spam" ? "Reason for reporting as spam *" : "Reason for allowlisting *"}
+                                        </label>
+                                        <Textarea
+                                            placeholder={submissionType === "spam" ? "Describe why this email/domain should be flagged as spam..." : "Describe why this email/domain should be allowed..."}
+                                            value={reason}
+                                            onChange={(e) => setReason(e.target.value)}
+                                            required
+                                            rows={3}
+                                        />
+                                    </div>
+                                    <Button type="submit" className="w-full" color={submissionType === "spam" ? "danger" : "primary"}>
+                                        {submissionType === "spam" ? <AlertTriangle className="h-4 w-4 mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
+                                        {submissionType === "spam" ? "Report as Spam" : "Suggest Allow"}
+                                    </Button>
+                                </form>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Stats and Recent Submissions */}
                     <div className="space-y-6">
                         {/* Community Stats */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg">Community Impact</CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6 border-b border-primary/10">
+                                <h3 className="text-lg font-bold">Community Impact</h3>
+                            </div>
+                            <div className="p-6">
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">Total Submissions</span>
-                                        <Badge variant="secondary">1,247</Badge>
+                                        <Badge variant="flat">1,247</Badge>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">Approved</span>
-                                        <Badge variant="default">892</Badge>
+                                        <Badge variant="solid">892</Badge>
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">Under Review</span>
@@ -263,21 +220,21 @@ export function HelpImproveClient() {
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm">Contributors</span>
-                                        <Badge variant="secondary">89</Badge>
+                                        <Badge variant="flat">89</Badge>
                                     </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
                         {/* Recent Activity */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg">Recent Submissions</CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6 border-b border-primary/10">
+                                <h3 className="text-lg font-bold">Recent Submissions</h3>
+                            </div>
+                            <div className="p-6">
                                 <div className="space-y-3">
                                     {mockSuggestions.slice(0, 3).map((suggestion) => (
-                                        <div key={suggestion.id} className="pb-3 border-b last:border-b-0">
+                                        <div key={suggestion.id} className="pb-3 border-b border-border last:border-b-0">
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-1">
@@ -299,9 +256,10 @@ export function HelpImproveClient() {
                                                             <span className="text-xs">{suggestion.votes}</span>
                                                         </div>
                                                         <Badge
-                                                            variant={suggestion.status === "approved" ? "default" : 
-                                                                    suggestion.status === "pending" ? "outline" : "secondary"}
+                                                            variant={suggestion.status === "approved" ? "solid" :
+                                                                suggestion.status === "pending" ? "outline" : "flat"}
                                                             className="text-xs"
+                                                            color={suggestion.status === "approved" ? "success" : suggestion.status === "pending" ? "warning" : "primary"}
                                                         >
                                                             {suggestion.status}
                                                         </Badge>
@@ -311,15 +269,15 @@ export function HelpImproveClient() {
                                         </div>
                                     ))}
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
 
                         {/* Guidelines */}
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg">Submission Guidelines</CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6 border-b border-primary/10">
+                                <h3 className="text-lg font-bold">Submission Guidelines</h3>
+                            </div>
+                            <div className="p-6">
                                 <div className="space-y-3 text-sm text-muted-foreground">
                                     <div className="flex items-start gap-2">
                                         <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
@@ -338,21 +296,21 @@ export function HelpImproveClient() {
                                         <p>All submissions are reviewed by moderators</p>
                                     </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Full Submissions List */}
                 <div className="mt-12">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>All Community Submissions</CardTitle>
+                    <div className="bg-card/50 border border-primary/20 rounded-xl">
+                        <div className="p-6 border-b border-primary/10">
+                            <h3 className="text-xl font-bold">All Community Submissions</h3>
                             <p className="text-muted-foreground">
                                 Vote on community submissions to help improve our spam detection
                             </p>
-                        </CardHeader>
-                        <CardContent>
+                        </div>
+                        <div className="p-6">
                             <div className="space-y-4">
                                 {mockSuggestions.map((suggestion) => (
                                     <div key={suggestion.id} className="p-4 border rounded-lg">
@@ -368,8 +326,9 @@ export function HelpImproveClient() {
                                                         {suggestion.email || suggestion.domain}
                                                     </code>
                                                     <Badge
-                                                        variant={suggestion.status === "approved" ? "default" : 
-                                                                suggestion.status === "pending" ? "outline" : "secondary"}
+                                                        variant={suggestion.status === "approved" ? "solid" :
+                                                            suggestion.status === "pending" ? "outline" : "flat"}
+                                                        color={suggestion.status === "approved" ? "success" : suggestion.status === "pending" ? "warning" : "primary"}
                                                     >
                                                         {suggestion.status}
                                                     </Badge>
@@ -404,8 +363,8 @@ export function HelpImproveClient() {
                                     </div>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

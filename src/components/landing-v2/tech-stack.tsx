@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Card imports removed
 import { motion } from "framer-motion";
 
 export function TechStack() {
@@ -71,17 +71,17 @@ export function TechStack() {
                 whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <Card className="h-full bg-card/50 border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                  <CardHeader>
+                <div className="h-full bg-card/50 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 rounded-xl">
+                  <div className="p-6">
                     <div className="flex items-center mb-4">
                       {tech.logo}
-                      <CardTitle className="ml-4 text-xl">{tech.name}</CardTitle>
+                      <h3 className="ml-4 text-xl font-semibold">{tech.name}</h3>
                     </div>
-                  </CardHeader>
-                  <CardContent>
+                  </div>
+                  <div className="p-6 pt-0">
                     <p className="text-muted-foreground">{tech.description}</p>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </motion.div>
             </motion.div>
           ))}

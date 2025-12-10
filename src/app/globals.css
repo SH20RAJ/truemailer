@@ -1,311 +1,107 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Black and white theme with beige accents */
+@source '../node_modules/rizzui/dist';
+@plugin '@tailwindcss/forms';
+
+/* Define color palette using OKLCH color space */
+:root {
+  /* Base Colors */
+  --background: oklch(100% 0 0);
+  --foreground: oklch(40.17% 0 0);
+  --muted: oklch(91.58% 0 0);
+  --muted-foreground: oklch(55.55% 0 0);
+
+  /* Border Tokens */
+  --border-radius: 0.5rem;
+  --border-width: 1px;
+  --border-color: oklch(91.58% 0 0);
+
+  /* Text Tokens */
+  --text-primary: oklch(0% 0 0);
+  --text-secondary: oklch(40.17% 0 0);
+
+  /* Primary Brand Colors */
+  --primary-lighter: oklch(91.58% 0 0);
+  --primary: oklch(17.76% 0 0);
+  --primary-dark: oklch(0% 0 0);
+  --primary-foreground: oklch(100% 0 0);
+
+  /* Secondary Colors */
+  --secondary-lighter: oklch(91.99% 0.0386 276.02);
+  --secondary: oklch(50.51% 0.2633 276.95);
+  --secondary-dark: oklch(45.41% 0.2431 277.06);
+  --secondary-foreground: oklch(100% 0 0);
+
+  /* Danger/Error Colors */
+  --red-lighter: oklch(89.99% 0.0393 14);
+  --red: oklch(59.6% 0.2445 29.23);
+  --red-dark: oklch(51.71% 0.2121 29.2338);
+
+  /* Warning Colors */
+  --orange-lighter: oklch(95.67% 0.0452 84.5695);
+  --orange: oklch(78.37% 0.1587 72.99);
+  --orange-dark: oklch(54.83% 0.1339 53.95);
+
+  /* Info Colors */
+  --blue-lighter: oklch(91.66% 0.0404 257.5078);
+  --blue: oklch(57.31% 0.2144 258.25);
+  --blue-dark: oklch(51.58% 0.1888 258.27);
+
+  /* Success Colors */
+  --green-lighter: oklch(92.79% 0.086 155.61);
+  --green: oklch(64.01% 0.1776 148.74);
+  --green-dark: oklch(53.79% 0.1441 149.52);
+}
+
+/* Dark mode overrides (keeping existing app dark theme feel if possible, or using RizzUI defaults) */
+/* The user requested "fetch all components from rizzui docs", so I should stick to their defaults initially */
+
 @theme inline {
-  --color-background: #000000;
-  --color-foreground: #ffffff;
-  --font-sans: var(--font-poppins);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --radius: var(--border-radius); /* Map --radius for Shadcn compatibility? No, user said delete Shadcn */
+  --border-radius: var(--border-radius);
+  --color-border: var(--border-color);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
 
-  /* Card colors */
-  --color-card: #111111;
-  --color-card-foreground: #ffffff;
+  --color-primary-lighter: var(--primary-lighter);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-foreground: var(--primary-foreground);
 
-  /* Border colors */
-  --color-border: #333333;
+  --color-secondary-lighter: var(--secondary-lighter);
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-foreground: var(--secondary-foreground);
 
-  /* Muted colors */
-  --color-muted: #1a1a1a;
-  --color-muted-foreground: #a3a3a3;
+  --color-red-lighter: var(--red-lighter);
+  --color-red: var(--red);
+  --color-red-dark: var(--red-dark);
 
-  /* Primary colors with beige accent */
-  --color-primary: #d4af8c;
-  --color-primary-foreground: #000000;
+  --color-orange-lighter: var(--orange-lighter);
+  --color-orange: var(--orange);
+  --color-orange-dark: var(--orange-dark);
 
-  /* Secondary colors */
-  --color-secondary: #2a2a2a;
-  --color-secondary-foreground: #ffffff;
+  --color-blue-lighter: var(--blue-lighter);
+  --color-blue: var(--blue);
+  --color-blue-dark: var(--blue-dark);
 
-  /* Accent colors - beige variations */
-  --color-accent: #e6c7a3;
-  --color-accent-foreground: #000000;
-
-  /* Destructive colors */
-  --color-destructive: #dc2626;
-  --color-destructive-foreground: #ffffff;
-
-  /* Ring color */
-  --color-ring: #d4af8c;
-
-  /* Input colors */
-  --color-input: #333333;
-
-  /* Radius */
-  --radius-sm: 0;
-  --radius-md: 0rem;
-  --radius-lg: 0rem;
-  --radius-xl: 0rem;
+  --color-green-lighter: var(--green-lighter);
+  --color-green: var(--green);
+  --color-green-dark: var(--green-dark);
 }
 
-/* Base styles */
+/* Layer base overrides */
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  /* Dashboard-only theme overrides (Twitter-inspired) */
-  .dashboard-theme {
-    /* Core brand accent (Twitter-esque but distinct) */
-    --color-primary: #1a8cd8; /* slightly deeper than Twitter blue */
-    --color-primary-foreground: #ffffff;
-
-    /* Sidebar palette */
-    --color-sidebar: #000000; /* pure black sidebar */
-    --color-sidebar-foreground: #e6e9ef; /* soft off-white text */
-    --color-sidebar-accent: #0f1419; /* subtle hover/active bg */
-    --color-sidebar-accent-foreground: #f8fafc; /* text on accent */
-    --color-sidebar-border: #2f3336; /* divider lines */
-    --color-sidebar-ring: #1a8cd8; /* focus ring */
-
-    /* General surfaces in dashboard area */
-    --color-background: #000000;
-    --color-foreground: #e6e9ef;
-    --color-card: #4594cd;
-    --color-card-foreground: #e6e9ef;
-    --color-muted: #0a0f14;
-    --color-muted-foreground: #9aa4ae;
-    --color-border: #2f3336;
-    --color-input: #2f3336;
-    --color-accent: #1a8cd8; /* used in some components */
-    --color-accent-foreground: #ffffff;
-  }
-}
-
-/* Custom utilities */
-@layer utilities {
-  .bg-gradient-dark {
-    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
-  }
-
-  .bg-gradient-beige {
-    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-  }
-
-  .text-gradient {
-    background: linear-gradient(90deg, #d4af8c 0%, #e6c7a3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Micro-interaction helpers */
-  .pressable {
-    transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease, color 140ms ease;
-  }
-  .pressable:active {
-    transform: translateY(1px) scale(0.99);
-  }
-  .hover-lift {
-    transition: transform 180ms ease, box-shadow 180ms ease;
-  }
-  .hover-lift:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-  }
-  .hover-slide-x {
-    transition: transform 140ms ease;
-  }
-  .hover-slide-x:hover {
-    transform: translateX(2px);
-  }
-  .focus-ring-smooth {
-    transition: box-shadow 140ms ease, outline-color 140ms ease;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .pressable, .hover-lift, .hover-slide-x, .focus-ring-smooth, * {
-      transition: none !important;
-      animation: none !important;
+    * {
+        @apply border-border;
     }
-  }
-}
-
-/* P
-rism.js theme overrides for dark theme */
-@layer components {
-
-  .token.comment,
-  .token.prolog,
-  .token.doctype,
-  .token.cdata {
-    color: #6b7280 !important;
-    /* gray-500 */
-  }
-
-  .token.punctuation {
-    color: #9ca3af !important;
-    /* gray-400 */
-  }
-
-  .token.property,
-  .token.tag,
-  .token.boolean,
-  .token.number,
-  .token.constant,
-  .token.symbol,
-  .token.deleted {
-    color: #60a5fa !important;
-    /* blue-400 */
-  }
-
-  .token.selector,
-  .token.attr-name,
-  .token.string,
-  .token.char,
-  .token.builtin,
-  .token.inserted {
-    color: #34d399 !important;
-    /* emerald-400 */
-  }
-
-  .token.operator,
-  .token.entity,
-  .token.url,
-  .language-css .token.string,
-  .style .token.string {
-    color: #f59e0b !important;
-    /* amber-500 */
-  }
-
-  .token.atrule,
-  .token.attr-value,
-  .token.keyword {
-    color: #a78bfa !important;
-    /* violet-400 */
-  }
-
-  .token.function,
-  .token.class-name {
-    color: #fbbf24 !important;
-    /* amber-400 */
-  }
-
-  .token.regex,
-  .token.important,
-  .token.variable {
-    color: #f87171 !important;
-    /* red-400 */
-  }
-
-  /* Override Prism Tomorrow theme background */
-  pre[class*="language-"] {
-    background: hsl(var(--muted)) !important;
-    border: 1px solid hsl(var(--border)) !important;
-  }
-
-  code[class*="language-"] {
-    color: hsl(var(--foreground)) !important;
-  }
-
-  /* Enhanced Prism.js token colors for better visibility */
-  .token.comment,
-  .token.prolog,
-  .token.doctype,
-  .token.cdata {
-    color: #6b7280 !important;
-    /* gray-500 */
-    font-style: italic !important;
-  }
-
-  .token.punctuation {
-    color: #9ca3af !important;
-    /* gray-400 */
-  }
-
-  .token.property,
-  .token.tag,
-  .token.boolean,
-  .token.number,
-  .token.constant,
-  .token.symbol,
-  .token.deleted {
-    color: #60a5fa !important;
-    /* blue-400 */
-  }
-
-  .token.selector,
-  .token.attr-name,
-  .token.string,
-  .token.char,
-  .token.builtin,
-  .token.inserted {
-    color: #34d399 !important;
-    /* emerald-400 */
-  }
-
-  .token.operator,
-  .token.entity,
-  .token.url,
-  .language-css .token.string,
-  .style .token.string {
-    color: #fbbf24 !important;
-    /* amber-400 */
-  }
-
-  .token.atrule,
-  .token.attr-value,
-  .token.keyword {
-    color: #a78bfa !important;
-    /* violet-400 */
-    font-weight: 600 !important;
-  }
-
-  .token.function,
-  .token.class-name {
-    color: #f472b6 !important;
-    /* pink-400 */
-    font-weight: 600 !important;
-  }
-
-  .token.regex,
-  .token.important,
-  .token.variable {
-    color: #f87171 !important;
-    /* red-400 */
-  }
-
-  /* Custom highlighting for our manual fallback */
-  .text-purple-400 {
-    color: #a78bfa !important;
-  }
-
-  .text-green-400 {
-    color: #34d399 !important;
-  }
-
-  .text-blue-400 {
-    color: #60a5fa !important;
-  }
-
-  .text-blue-300 {
-    color: #93c5fd !important;
-  }
-
-  .text-orange-400 {
-    color: #fb923c !important;
-  }
-
-  .text-gray-500 {
-    color: #6b7280 !important;
-  }
-
-  .text-gray-300 {
-    color: #d1d5db !important;
-  }
+    body {
+        @apply bg-background text-foreground;
+    }
 }

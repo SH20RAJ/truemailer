@@ -1,25 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
-import { 
-  Shield, ShieldCheck, Plus, Trash2, Loader2, 
+import { Badge, Button, Input, Textarea, Modal, Title, Text, ActionIcon } from "rizzui";
+import {
+  Shield, ShieldCheck, Plus, Trash2, Loader2,
   Mail, Globe, AlertTriangle
 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PersonalListEntry {
   id: number;
@@ -62,7 +48,9 @@ export function PersonalListsClient() {
   const [bulkReason, setBulkReason] = useState("");
   const [bulkProgress, setBulkProgress] = useState<{ current: number; total: number } | null>(null);
 
-  // Fetch lists on component mount
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'blocklist' | 'whitelist'>('blocklist');
+
   useEffect(() => {
     fetchLists();
   }, []);
@@ -71,7 +59,7 @@ export function PersonalListsClient() {
     try {
       setLoading(true);
       setError("");
-      
+
       const [blocklistResponse, whitelistResponse] = await Promise.all([
         fetch('/api/dashboard/blocklist'),
         fetch('/api/dashboard/whitelist')
@@ -118,11 +106,8 @@ export function PersonalListsClient() {
         throw new Error(errorData.error || 'Failed to add entry');
       }
 
-      // Reset form and close dialog
       setNewEntry({ emailOrDomain: "", type: "email", reason: "" });
       setDialogOpen(false);
-      
-      // Refresh lists
       await fetchLists();
     } catch (error) {
       console.error(`Error adding to ${listType}:`, error);
@@ -147,7 +132,6 @@ export function PersonalListsClient() {
         throw new Error(errorData.error || 'Failed to remove entry');
       }
 
-      // Refresh lists
       await fetchLists();
     } catch (error) {
       console.error(`Error removing from ${listType}:`, error);
@@ -200,7 +184,6 @@ export function PersonalListsClient() {
         setBulkProgress({ current: i + 1, total: lines.length });
       }
 
-      // Reset and refresh
       setBulkOpen(false);
       setBulkText("");
       setBulkReason("");
@@ -217,245 +200,177 @@ export function PersonalListsClient() {
 
   if (loading) {
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-8">
+      <div className="bg-card/50 border border-primary/20 rounded-xl">
+        <div className="flex items-center justify-center py-8">
           <Loader2 className="h-8 w-8 animate-spin" />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
+
+  const currentList = activeTab === 'blocklist' ? blocklist : whitelist;
+  const ListIcon = activeTab === 'blocklist' ? Shield : ShieldCheck;
+  const iconColor = activeTab === 'blocklist' ? 'text-red-500' : 'text-green-500';
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold">Personal Lists</h2>
-        <p className="text-muted-foreground">
+        <Title as="h2" className="text-2xl font-bold">Personal Lists</Title>
+        <Text className="text-muted-foreground">
           Manage your personal blocklist and whitelist to override default email validation results.
           Whitelist entries always take precedence over blocklist entries.
-        </p>
+        </Text>
       </div>
 
       {error && (
         <div className="p-4 border border-red-200 bg-red-50 rounded-lg flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <span className="text-red-600">{error}</span>
+          <Text className="text-red-600">{error}</Text>
         </div>
       )}
 
-      <Tabs defaultValue="blocklist" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="blocklist" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Blocklist ({blocklist.length})
-          </TabsTrigger>
-          <TabsTrigger value="whitelist" className="flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4" />
-            Whitelist ({whitelist.length})
-          </TabsTrigger>
-        </TabsList>
+      {/* Custom Tabs */}
+      <div className="flex space-x-1 bg-muted/50 p-1 rounded-lg w-fit">
+        <button
+          onClick={() => setActiveTab('blocklist')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'blocklist'
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+            }`}
+        >
+          <Shield className="h-4 w-4" />
+          Blocklist ({blocklist.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('whitelist')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === 'whitelist'
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+            }`}
+        >
+          <ShieldCheck className="h-4 w-4" />
+          Whitelist ({whitelist.length})
+        </button>
+      </div>
 
-        {/* Blocklist Tab */}
-        <TabsContent value="blocklist" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 h-5 text-red-500" />
-                    Blocklist
-                  </CardTitle>
-                  <CardDescription>
-                    Emails and domains in this list will always be marked as invalid, regardless of other validation checks.
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                <Button onClick={() => openAddDialog('blocklist')} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Entry
-                </Button>
-                <Button variant="outline" onClick={() => openBulkDialog('blocklist')} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Bulk Add
-                </Button>
-                </div>
+      {/* List Content */}
+      <div className="bg-card/50 border border-primary/20 rounded-xl">
+        <div className="p-6 border-b border-primary/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <ListIcon className={`h-5 h-5 ${iconColor}`} />
+                <Title as="h3" className="text-xl font-bold">
+                  {activeTab === 'blocklist' ? 'Blocklist' : 'Whitelist'}
+                </Title>
               </div>
-            </CardHeader>
-            <CardContent>
-              {blocklist.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No entries in your blocklist</p>
-                  <p className="text-sm">Add emails or domains to block them from validation.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {blocklist.map((entry) => (
-                    <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {entry.type === 'email' ? (
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <div>
-                          <p className="font-medium">{entry.emailOrDomain}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
-                              {entry.type}
-                            </Badge>
-                            {entry.reason && <span>• {entry.reason}</span>}
-                            <span>• {new Date(entry.createdAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
+              <Text className="text-sm text-muted-foreground mt-1">
+                {activeTab === 'blocklist'
+                  ? 'Emails and domains in this list will always be marked as invalid, regardless of other validation checks.'
+                  : 'Emails and domains in this list will always be marked as valid, overriding all other validation checks including blocklist entries.'}
+              </Text>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => openAddDialog(activeTab)} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Entry
+              </Button>
+              <Button variant="outline" onClick={() => openBulkDialog(activeTab)} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Bulk Add
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="p-6">
+          {currentList.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <ListIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <Text>No entries in your {activeTab}</Text>
+              <Text className="text-sm">
+                Add emails or domains to {activeTab === 'blocklist' ? 'block them from validation' : 'always mark them as valid'}.
+              </Text>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {currentList.map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between p-3 border border-border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {entry.type === 'email' ? (
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Globe className="h-4 w-4 text-muted-foreground" />
+                    )}
+                    <div>
+                      <Text className="font-medium">{entry.emailOrDomain}</Text>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Badge variant="outline" className="text-xs">
+                          {entry.type}
+                        </Badge>
+                        {entry.reason && <span>• {entry.reason}</span>}
+                        <span>• {new Date(entry.createdAt).toLocaleDateString()}</span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromList('blocklist', entry.id)}
-                        disabled={actionLoading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
-                  ))}
+                  </div>
+                  <ActionIcon
+                    variant="text"
+                    size="sm"
+                    onClick={() => removeFromList(activeTab, entry.id)}
+                    disabled={actionLoading}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </ActionIcon>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
-        {/* Whitelist Tab */}
-        <TabsContent value="whitelist" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <ShieldCheck className="h-5 h-5 text-green-500" />
-                    Whitelist
-                  </CardTitle>
-                  <CardDescription>
-                    Emails and domains in this list will always be marked as valid, overriding all other validation checks including blocklist entries.
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                <Button onClick={() => openAddDialog('whitelist')} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Entry
-                </Button>
-                <Button variant="outline" onClick={() => openBulkDialog('whitelist')} size="sm">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Bulk Add
-                </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {whitelist.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No entries in your whitelist</p>
-                  <p className="text-sm">Add emails or domains to always mark them as valid.</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {whitelist.map((entry) => (
-                    <div key={entry.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        {entry.type === 'email' ? (
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                        )}
-                        <div>
-                          <p className="font-medium">{entry.emailOrDomain}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
-                              {entry.type}
-                            </Badge>
-                            {entry.reason && <span>• {entry.reason}</span>}
-                            <span>• {new Date(entry.createdAt).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromList('whitelist', entry.id)}
-                        disabled={actionLoading}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Add Entry Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+      {/* Add Entry Modal */}
+      <Modal isOpen={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <div className="p-6">
+          <div className="mb-4">
+            <Title as="h3" className="text-lg font-semibold">
               Add to {dialogType === 'blocklist' ? 'Blocklist' : 'Whitelist'}
-            </DialogTitle>
-            <DialogDescription>
-              {dialogType === 'blocklist' 
+            </Title>
+            <Text className="text-sm text-muted-foreground">
+              {dialogType === 'blocklist'
                 ? 'Add an email or domain to block from validation.'
-                : 'Add an email or domain to always mark as valid.'
-              }
-            </DialogDescription>
-          </DialogHeader>
+                : 'Add an email or domain to always mark as valid.'}
+            </Text>
+          </div>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="type">Type</Label>
-              <Select
+              <label className="text-sm font-medium">Type</label>
+              <select
                 value={newEntry.type}
-                onValueChange={(value: 'email' | 'domain') => 
-                  setNewEntry(prev => ({ ...prev, type: value }))
-                }
+                onChange={(e) => setNewEntry(prev => ({ ...prev, type: e.target.value as 'email' | 'domain' }))}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">Email Address</SelectItem>
-                  <SelectItem value="domain">Domain</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="email">Email Address</option>
+                <option value="domain">Domain</option>
+              </select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="emailOrDomain">
+              <label className="text-sm font-medium">
                 {newEntry.type === 'email' ? 'Email Address' : 'Domain'}
-              </Label>
+              </label>
               <Input
-                id="emailOrDomain"
-                placeholder={
-                  newEntry.type === 'email' 
-                    ? 'user@example.com'
-                    : 'example.com'
-                }
+                placeholder={newEntry.type === 'email' ? 'user@example.com' : 'example.com'}
                 value={newEntry.emailOrDomain}
-                onChange={(e) => 
-                  setNewEntry(prev => ({ ...prev, emailOrDomain: e.target.value }))
-                }
+                onChange={(e) => setNewEntry(prev => ({ ...prev, emailOrDomain: e.target.value }))}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason (Optional)</Label>
+              <label className="text-sm font-medium">Reason (Optional)</label>
               <Textarea
-                id="reason"
                 placeholder="Why are you adding this entry?"
                 value={newEntry.reason}
-                onChange={(e) => 
-                  setNewEntry(prev => ({ ...prev, reason: e.target.value }))
-                }
+                onChange={(e) => setNewEntry(prev => ({ ...prev, reason: e.target.value }))}
                 rows={3}
               />
             </div>
@@ -464,7 +379,7 @@ export function PersonalListsClient() {
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={() => addToList(dialogType)}
                 disabled={actionLoading || !newEntry.emailOrDomain.trim()}
               >
@@ -473,58 +388,57 @@ export function PersonalListsClient() {
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Modal>
 
-      {/* Bulk Add Dialog */}
-      <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
+      {/* Bulk Add Modal */}
+      <Modal isOpen={bulkOpen} onClose={() => setBulkOpen(false)}>
+        <div className="p-6 max-w-lg">
+          <div className="mb-4">
+            <Title as="h3" className="text-lg font-semibold">
               Bulk add to {bulkListType === 'blocklist' ? 'Blocklist' : 'Whitelist'}
-            </DialogTitle>
-            <DialogDescription>
-              Paste one item per line. Choose type or use Auto to infer by “@”.
-            </DialogDescription>
-          </DialogHeader>
+            </Title>
+            <Text className="text-sm text-muted-foreground">
+              Paste one item per line. Choose type or use Auto to infer by "@".
+            </Text>
+          </div>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Type</Label>
-              <Select value={bulkType} onValueChange={(v: 'auto' | 'email' | 'domain') => setBulkType(v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="auto">Auto (detect)</SelectItem>
-                  <SelectItem value="email">Email</SelectItem>
-                  <SelectItem value="domain">Domain</SelectItem>
-                </SelectContent>
-              </Select>
+              <label className="text-sm font-medium">Type</label>
+              <select
+                value={bulkType}
+                onChange={(e) => setBulkType(e.target.value as 'auto' | 'email' | 'domain')}
+                className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground"
+              >
+                <option value="auto">Auto (detect)</option>
+                <option value="email">Email</option>
+                <option value="domain">Domain</option>
+              </select>
             </div>
 
             <div className="space-y-2">
-              <Label>Entries</Label>
+              <label className="text-sm font-medium">Entries</label>
               <Textarea
                 placeholder={"user@example.com\nexample.com\n..."}
                 rows={10}
                 value={bulkText}
                 onChange={(e) => setBulkText(e.target.value)}
               />
-              <div className="text-xs text-muted-foreground">
+              <Text className="text-xs text-muted-foreground">
                 {bulkText.split(/\r?\n/).filter((l) => l.trim()).length} items
-              </div>
+              </Text>
             </div>
 
             <div className="space-y-2">
-              <Label>Reason (optional)</Label>
+              <label className="text-sm font-medium">Reason (optional)</label>
               <Input value={bulkReason} onChange={(e) => setBulkReason(e.target.value)} placeholder="e.g. disposable provider" />
             </div>
 
             <div className="flex justify-end gap-2 items-center">
               {bulkProgress && (
-                <span className="text-xs text-muted-foreground mr-auto">
+                <Text className="text-xs text-muted-foreground mr-auto">
                   Adding {bulkProgress.current}/{bulkProgress.total}
-                </span>
+                </Text>
               )}
               <Button variant="outline" onClick={() => setBulkOpen(false)} disabled={actionLoading}>
                 Cancel
@@ -535,8 +449,8 @@ export function PersonalListsClient() {
               </Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Modal>
     </div>
   );
 }

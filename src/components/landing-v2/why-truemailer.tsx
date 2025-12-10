@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 export function WhyTrueMailer() {
@@ -88,17 +87,17 @@ export function WhyTrueMailer() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <Card className="h-full bg-card/50 border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10">
-                <CardHeader>
+              <div className="h-full bg-card/50 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 rounded-xl">
+                <div className="p-6">
                   <div className="flex items-center mb-2">
                     {benefit.icon}
-                    <CardTitle className="ml-2 text-lg">{benefit.title}</CardTitle>
+                    <h3 className="ml-2 text-lg font-semibold">{benefit.title}</h3>
                   </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="p-6 pt-0">
                   <p className="text-muted-foreground">{benefit.description}</p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -110,11 +109,11 @@ export function WhyTrueMailer() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <Card className="bg-card/50 border-primary/20">
-            <CardHeader>
-              <CardTitle className="text-2xl text-center">TrueMailer vs Other Email Validation APIs</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="bg-card/50 border border-primary/20 rounded-xl">
+            <div className="p-6">
+              <h3 className="text-2xl text-center font-semibold">TrueMailer vs Other Email Validation APIs</h3>
+            </div>
+            <div className="p-6 pt-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -149,8 +148,8 @@ export function WhyTrueMailer() {
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

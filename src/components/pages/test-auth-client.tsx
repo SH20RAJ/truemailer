@@ -2,8 +2,7 @@
 
 import { useUser } from "@stackframe/stack";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "rizzui";
 import { AuthButtons } from "@/components/auth-buttons";
 import { Loader2 } from "lucide-react";
 import type { User as DbUser } from "@/lib/db/schema";
@@ -53,12 +52,12 @@ export default function TestAuthClient() {
 
         {user && (
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>StackAuth User</CardTitle>
-                <CardDescription>User data from StackAuth</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
+            <div className="bg-card/50 border border-primary/20 rounded-xl">
+              <div className="p-6 border-b border-primary/10">
+                <h3 className="text-lg font-bold">StackAuth User</h3>
+                <p className="text-sm text-muted-foreground">User data from StackAuth</p>
+              </div>
+              <div className="p-6 space-y-2">
                 <div><strong>ID:</strong> {user.id}</div>
                 <div><strong>Email:</strong> {user.primaryEmail}</div>
                 <div><strong>Display Name:</strong> {user.displayName || "Not set"}</div>
@@ -69,15 +68,15 @@ export default function TestAuthClient() {
                     <Image src={user.profileImageUrl} alt="Profile" width={32} height={32} className="rounded-full" unoptimized />
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Database User</CardTitle>
-                <CardDescription>User data stored in D1 database</CardDescription>
-              </CardHeader>
-              <CardContent>
+            <div className="bg-card/50 border border-primary/20 rounded-xl">
+              <div className="p-6 border-b border-primary/10">
+                <h3 className="text-lg font-bold">Database User</h3>
+                <p className="text-sm text-muted-foreground">User data stored in D1 database</p>
+              </div>
+              <div className="p-6">
                 {loading && (<div className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Loading...</div>)}
                 {error && (<div className="text-red-500">Error: {error}</div>)}
                 {dbUser && !loading && (
@@ -96,19 +95,20 @@ export default function TestAuthClient() {
                   </Button>
                   <Button onClick={fetchDbUser} disabled={loading} variant="outline" className="w-full">Refresh Database Data</Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         )}
 
         {!user && (
-          <Card className="text-center">
-            <CardContent className="pt-6">
+          <div className="bg-card/50 border border-primary/20 rounded-xl text-center">
+            <div className="p-6 pt-6">
               <p className="text-muted-foreground mb-4">Please sign in to test the authentication integration</p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
       </div>
     </div>
   );
 }
+

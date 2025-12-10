@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { CodeBlock } from "@/components/ui/code-block";
+import { Button, Input, Badge } from "rizzui";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -53,10 +49,10 @@ export function TestAPIClient() {
 
     const getRiskColor = (riskLevel: string) => {
         switch (riskLevel) {
-            case 'low': return 'bg-green-500/20 text-green-400 border-green-500/50';
-            case 'medium': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-            case 'high': return 'bg-red-500/20 text-red-400 border-red-500/50';
-            default: return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+            case 'low': return 'success';
+            case 'medium': return 'warning';
+            case 'high': return 'danger';
+            default: return 'secondary';
         }
     };
 
@@ -67,7 +63,7 @@ export function TestAPIClient() {
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center gap-4">
                         <Link href="/">
-                            <Button variant="ghost" size="sm">
+                            <Button variant="text" size="sm">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
                                 Back to Home
                             </Button>
@@ -86,14 +82,14 @@ export function TestAPIClient() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Test Form */}
                     <div>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Email Validation Test</CardTitle>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6 border-b border-primary/10">
+                                <h3 className="text-xl font-bold">Email Validation Test</h3>
                                 <p className="text-muted-foreground">
                                     Enter an email address to test our validation API
                                 </p>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
+                            </div>
+                            <div className="p-6 space-y-4">
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div>
                                         <label className="text-sm font-medium mb-2 block">
@@ -123,7 +119,7 @@ export function TestAPIClient() {
                                     </Button>
                                 </form>
 
-                                <div className="pt-4 border-t">
+                                <div className="pt-4 border-t border-primary/10">
                                     <p className="text-sm font-medium mb-3">Quick Test Examples:</p>
                                     <div className="grid grid-cols-1 gap-2">
                                         {testEmails.map((testEmail) => (
@@ -140,17 +136,17 @@ export function TestAPIClient() {
                                         ))}
                                     </div>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Results */}
                     <div>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Validation Results</CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6 border-b border-primary/10">
+                                <h3 className="text-xl font-bold">Validation Results</h3>
+                            </div>
+                            <div className="p-6">
                                 {error && (
                                     <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400">
                                         <p className="font-medium">Error:</p>
@@ -162,14 +158,14 @@ export function TestAPIClient() {
                                     <div className="space-y-4">
                                         <div className="flex items-center gap-2 mb-4">
                                             <Badge
-                                                variant={result.valid ? "default" : "destructive"}
-                                                className={result.valid ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}
+                                                color={result.valid ? "success" : "danger"}
+                                                variant={result.valid ? "flat" : "flat"}
                                             >
                                                 {result.valid ? "✅ Valid" : "❌ Invalid"}
                                             </Badge>
                                             <Badge
                                                 variant="outline"
-                                                className={getRiskColor(result.risk_level)}
+                                                color={getRiskColor(result.risk_level) as any}
                                             >
                                                 {result.risk_level.toUpperCase()} RISK
                                             </Badge>
@@ -210,12 +206,12 @@ export function TestAPIClient() {
                                             </div>
                                         </div>
 
-                                        <div className="pt-4 border-t">
+                                        <div className="pt-4 border-t border-primary/10">
                                             <p className="text-sm font-medium mb-2">Reason:</p>
                                             <p className="text-sm text-muted-foreground">{result.reason}</p>
                                         </div>
 
-                                        <div className="pt-4 border-t">
+                                        <div className="pt-4 border-t border-primary/10">
                                             <p className="text-sm font-medium mb-2">Response Time:</p>
                                             <p className="text-sm text-muted-foreground">{result.response_time}ms</p>
                                         </div>
@@ -227,56 +223,53 @@ export function TestAPIClient() {
                                         <p>Enter an email address to see validation results</p>
                                     </div>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* API Documentation */}
                 <div className="mt-12">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>API Usage Examples</CardTitle>
+                    <div className="bg-card/50 border border-primary/20 rounded-xl">
+                        <div className="p-6 border-b border-primary/10">
+                            <h3 className="text-xl font-bold">API Usage Examples</h3>
                             <p className="text-muted-foreground">
                                 See how to integrate our API into your application
                             </p>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
+                        </div>
+                        <div className="p-6 space-y-6">
                             <div>
                                 <h3 className="text-lg font-semibold mb-3">cURL Request</h3>
-                                <CodeBlock 
-                                    code={`curl "https://truemailer.strivio.world/api/validate?email=test@example.com"`}
-                                    language="bash"
-                                />
+                                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+                                    <code>{`curl "https://truemailer.strivio.world/api/validate?email=test@example.com"`}</code>
+                                </pre>
                             </div>
 
                             <div>
                                 <h3 className="text-lg font-semibold mb-3">JavaScript (Fetch)</h3>
-                                <CodeBlock 
-                                    code={`const response = await fetch('https://truemailer.strivio.world/api/validate?email=test@example.com');
+                                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+                                    <code>{`const response = await fetch('https://truemailer.strivio.world/api/validate?email=test@example.com');
 const data = await response.json();
-console.log(data);`}
-                                    language="javascript"
-                                />
+console.log(data);`}</code>
+                                </pre>
                             </div>
 
                             <div>
                                 <h3 className="text-lg font-semibold mb-3">Python (Requests)</h3>
-                                <CodeBlock 
-                                    code={`import requests
+                                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+                                    <code>{`import requests
 
 response = requests.get('https://truemailer.strivio.world/api/validate', 
                        params={'email': 'test@example.com'})
 data = response.json()
-print(data)`}
-                                    language="python"
-                                />
+print(data)`}</code>
+                                </pre>
                             </div>
 
                             <div>
                                 <h3 className="text-lg font-semibold mb-3">Response Format</h3>
-                                <CodeBlock 
-                                    code={`{
+                                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+                                    <code>{`{
   "email": "test@example.com",
   "domain": "example.com",
   "valid": true,
@@ -287,12 +280,11 @@ print(data)`}
   "risk_level": "low",
   "reason": "Valid email address",
   "response_time": 45
-}`}
-                                    language="json"
-                                />
+}`}</code>
+                                </pre>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

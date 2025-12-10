@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button, Input, Textarea, Badge, Title, Text } from "rizzui";
 import { ArrowLeft, Loader2, Mail, Upload, Play, Download, Copy, History } from "lucide-react";
 import Link from "next/link";
 
@@ -27,7 +22,7 @@ export default function StandalonePlaygroundClient() {
 
   useEffect(() => {
     const saved = localStorage.getItem('truemailer-history');
-    if (saved) { try { setHistory(JSON.parse(saved)); } catch {} }
+    if (saved) { try { setHistory(JSON.parse(saved)); } catch { } }
   }, []);
 
   const saveToHistory = (r: ValidationResult) => {
@@ -72,7 +67,7 @@ export default function StandalonePlaygroundClient() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/"><Button variant="ghost" size="sm"><ArrowLeft className="h-4 w-4 mr-2" />Back to Home</Button></Link>
+              <Link href="/"><Button variant="text" size="sm"><ArrowLeft className="h-4 w-4 mr-2" />Back to Home</Button></Link>
               <div>
                 <h1 className="text-2xl font-bold flex items-center gap-2"><Play className="h-6 w-6 text-primary" />Email Validation Playground</h1>
                 <p className="text-muted-foreground">Interactive testing environment for email validation API</p>
@@ -88,15 +83,35 @@ export default function StandalonePlaygroundClient() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
           <div className="xl:col-span-3">
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Mail className="h-5 w-5" />Email Validation Testing</CardTitle></CardHeader>
-              <CardContent>
-                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "single" | "batch")}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="single" className="flex items-center gap-2"><Mail className="h-4 w-4" />Single Email</TabsTrigger>
-                    <TabsTrigger value="batch" className="flex items-center gap-2"><Upload className="h-4 w-4" />Batch Validation</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="single" className="mt-6">
+            <div className="bg-card/50 border border-primary/20 rounded-xl">
+              <div className="p-6 border-b border-primary/10">
+                <Title as="h2" className="flex items-center gap-2"><Mail className="h-5 w-5" />Email Validation Testing</Title>
+              </div>
+              <div className="p-6">
+                {/* Custom Tabs */}
+                <div className="flex space-x-1 bg-muted/50 p-1 rounded-lg mb-6 w-fit">
+                  <button
+                    onClick={() => setActiveTab("single")}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === "single"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                      }`}
+                  >
+                    <Mail className="h-4 w-4" />Single Email
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("batch")}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === "batch"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-background/50 hover:text-foreground"
+                      }`}
+                  >
+                    <Upload className="h-4 w-4" />Batch Validation
+                  </button>
+                </div>
+
+                {activeTab === "single" && (
+                  <div className="mt-6">
                     <form onSubmit={handleSingleSubmit} className="space-y-4">
                       <div>
                         <label htmlFor="email" className="text-sm text-muted-foreground">Email address</label>
@@ -106,12 +121,18 @@ export default function StandalonePlaygroundClient() {
                     </form>
                     {result && (
                       <div className="mt-5 p-4 rounded-lg border border-border/50">
-                        <div className="flex items-center gap-2 mb-2"><Badge variant={result.valid ? 'default' : 'destructive'}>{result.valid ? 'Valid' : 'Invalid'}</Badge><Badge variant="outline">{Math.round(result.confidence_score * 100)}% confidence</Badge></div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge color={result.valid ? 'success' : 'danger'} variant="flat">{result.valid ? 'Valid' : 'Invalid'}</Badge>
+                          <Badge variant="outline">{Math.round(result.confidence_score * 100)}% confidence</Badge>
+                        </div>
                         <div className="text-sm"><div className="flex justify-between"><span className="text-muted-foreground">Email</span><span className="font-medium">{result.email}</span></div><div className="flex justify-between"><span className="text-muted-foreground">Domain</span><span className="font-medium">{result.domain}</span></div></div>
                       </div>
                     )}
-                  </TabsContent>
-                  <TabsContent value="batch" className="mt-6">
+                  </div>
+                )}
+
+                {activeTab === "batch" && (
+                  <div className="mt-6">
                     <div className="space-y-3">
                       <label htmlFor="batch" className="text-sm text-muted-foreground">One email per line (max 100)</label>
                       <Textarea id="batch" rows={10} value={batchEmails} onChange={(e) => setBatchEmails(e.target.value)} placeholder={"user1@example.com\nuser2@example.com"} />
@@ -132,30 +153,32 @@ export default function StandalonePlaygroundClient() {
                         </div>
                       )}
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           <div>
-            <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><History className="h-4 w-4" />Recent History</CardTitle></CardHeader>
-              <CardContent>
+            <div className="bg-card/50 border border-primary/20 rounded-xl">
+              <div className="p-6 border-b border-primary/10">
+                <Title as="h2" className="flex items-center gap-2"><History className="h-4 w-4" />Recent History</Title>
+              </div>
+              <div className="p-6">
                 <div className="space-y-2 text-sm">
                   {history.length === 0 && (<div className="text-muted-foreground">No history yet</div>)}
                   {history.map((h, i) => (
                     <div key={i} className="flex items-center justify-between gap-2 p-2 rounded border border-border/50">
                       <span className="truncate max-w-[200px]" title={h.email}>{h.email}</span>
                       <div className="flex items-center gap-1">
-                        <Badge variant={h.valid ? 'default' : 'destructive'}>{h.valid ? 'Valid' : 'Invalid'}</Badge>
-                        <Button size="icon" variant="ghost" onClick={() => copyToClipboard(h.email)} aria-label="Copy email"><Copy className="h-4 w-4" /></Button>
+                        <Badge color={h.valid ? 'success' : 'danger'} variant="flat">{h.valid ? 'Valid' : 'Invalid'}</Badge>
+                        <Button size="sm" variant="text" onClick={() => copyToClipboard(h.email)} aria-label="Copy email"><Copy className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
                 </div>
-                {history.length > 0 && (<Button variant="ghost" size="sm" className="mt-2" onClick={clearHistory}>Clear history</Button>)}
-              </CardContent>
-            </Card>
+                {history.length > 0 && (<Button variant="text" size="sm" className="mt-2" onClick={clearHistory}>Clear history</Button>)}
+              </div>
+            </div>
           </div>
         </div>
       </div>

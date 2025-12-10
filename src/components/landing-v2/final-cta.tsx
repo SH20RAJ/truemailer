@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "rizzui";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -24,15 +24,11 @@ export function FinalCTA() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-lg font-medium transition-all duration-300 transform hover:scale-105" asChild>
-              <Link href="#quick-integration">
-                Get Started Now
-              </Link>
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-8 py-6 h-auto" as={Link} href="#get-started">
+              Start Validating Now
             </Button>
-            <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10 px-8 py-6 text-lg font-medium" asChild>
-              <Link href="https://github.com/sh20raj/truemailer" target="_blank">
-                View on GitHub
-              </Link>
+            <Button variant="outline" className="border-primary/50 text-primary hover:bg-primary/10 px-8 py-6 text-lg font-medium" as={Link} href="https://github.com/sh20raj/truemailer" target="_blank">
+              View on GitHub
             </Button>
           </div>
 

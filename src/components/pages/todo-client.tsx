@@ -1,11 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button, Textarea, Badge, Title, Text, ActionIcon } from "rizzui";
 import { CheckCircle, XCircle, Database, Plus, Loader2, Edit, Trash2, Save, X } from "lucide-react";
-import { Textarea } from "@/components/ui/textarea";
 
 interface Todo {
   id: number;
@@ -102,35 +99,39 @@ export default function TodoClient() {
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Todo CRUD with D1 Database</h1>
-          <p className="text-muted-foreground">Create, Read, Update, Delete todos using Cloudflare D1 + Drizzle ORM</p>
+          <Title as="h1" className="text-3xl font-bold mb-4">Todo CRUD with D1 Database</Title>
+          <Text className="text-muted-foreground">Create, Read, Update, Delete todos using Cloudflare D1 + Drizzle ORM</Text>
         </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2"><Database className="w-5 h-5" />Database Status</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-card/50 border border-primary/20 rounded-xl mb-6">
+          <div className="p-6 border-b border-primary/10">
+            <Title as="h2" className="flex items-center gap-2"><Database className="w-5 h-5" />Database Status</Title>
+          </div>
+          <div className="p-6">
             {loading ? (
               <div className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />Checking database connection...</div>
             ) : (
               <div className="flex items-center gap-2">
-                {error ? (<><XCircle className="w-5 h-5 text-red-500" /><Badge variant="destructive">Error</Badge><span className="text-sm text-red-600">{error}</span></>) : (<><CheckCircle className="w-5 h-5 text-green-500" /><Badge variant="default">Connected</Badge><span className="text-sm text-muted-foreground">Found {todos.length} todo(s) in database</span></>)}
+                {error ? (<><XCircle className="w-5 h-5 text-red-500" /><Badge color="danger" variant="flat">Error</Badge><Text className="text-sm text-red-600">{error}</Text></>) : (<><CheckCircle className="w-5 h-5 text-green-500" /><Badge color="success" variant="flat">Connected</Badge><Text className="text-sm text-muted-foreground">Found {todos.length} todo(s) in database</Text></>)}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {error && !loading && (
-          <Card className="mb-6 border-red-200"><CardContent className="pt-6"><div className="text-red-600"><strong>Error:</strong> {error}</div></CardContent></Card>
+          <div className="bg-card/50 border border-red-200 rounded-xl mb-6">
+            <div className="p-6">
+              <div className="text-red-600"><strong>Error:</strong> {error}</div>
+            </div>
+          </div>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Todo Management</CardTitle>
-            <CardDescription>Full CRUD operations with real database storage</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-card/50 border border-primary/20 rounded-xl">
+          <div className="p-6 border-b border-primary/10">
+            <Title as="h2">Todo Management</Title>
+            <Text className="text-sm text-muted-foreground">Full CRUD operations with real database storage</Text>
+          </div>
+          <div className="p-6">
             <div className="flex gap-2 mb-6">
               <Textarea placeholder="Enter a todo item..." value={newTodo} onChange={(e) => setNewTodo(e.target.value)} onKeyPress={handleKeyPress} disabled={submitting} className="min-h-[60px]" />
               <Button onClick={createTodo} disabled={!newTodo.trim() || submitting} className="flex items-center gap-2 self-start">
@@ -161,7 +162,7 @@ export default function TodoClient() {
                   {editingId !== todo.id && (
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" onClick={() => startEdit(todo)} className="flex items-center gap-1"><Edit className="w-3 h-3" />Edit</Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteTodo(todo.id)} className="flex items-center gap-1"><Trash2 className="w-3 h-3" />Delete</Button>
+                      <Button size="sm" color="danger" onClick={() => deleteTodo(todo.id)} className="flex items-center gap-1"><Trash2 className="w-3 h-3" />Delete</Button>
                     </div>
                   )}
                 </div>
@@ -171,19 +172,21 @@ export default function TodoClient() {
             {todos.length === 0 && !loading && !error && (
               <div className="text-center text-muted-foreground py-8">No todos yet. Add one above!</div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="mt-6">
-          <CardHeader><CardTitle>CRUD Operations</CardTitle></CardHeader>
-          <CardContent className="space-y-2 text-sm">
+        <div className="bg-card/50 border border-primary/20 rounded-xl mt-6">
+          <div className="p-6 border-b border-primary/10">
+            <Title as="h2">CRUD Operations</Title>
+          </div>
+          <div className="p-6 space-y-2 text-sm">
             <p><strong>Create:</strong> Enter content and click &quot;Add&quot;</p>
             <p><strong>Read:</strong> Todos are displayed with their database ID</p>
             <p><strong>Update:</strong> Click &quot;Edit&quot; then &quot;Save&quot;</p>
             <p><strong>Delete:</strong> Click &quot;Delete&quot; to remove a todo</p>
-            <p className="text-muted-foreground mt-3">All operations use Cloudflare D1 + Drizzle ORM</p>
-          </CardContent>
-        </Card>
+            <Text className="text-muted-foreground mt-3">All operations use Cloudflare D1 + Drizzle ORM</Text>
+          </div>
+        </div>
       </div>
     </div>
   );

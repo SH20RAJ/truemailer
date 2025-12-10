@@ -1,21 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Button, Input, Textarea, Badge, Modal } from "rizzui";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 
 export function SuggestEmails() {
     const [email, setEmail] = useState("");
@@ -119,24 +108,24 @@ export function SuggestEmails() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <Card className="bg-card/50 border-primary/20">
-                            <CardHeader>
-                                <CardTitle className="text-2xl">Suggest Email/Domain</CardTitle>
-                            </CardHeader>
-                            <CardContent>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6">
+                                <h3 className="text-2xl font-bold mb-4">Suggest Email/Domain</h3>
+                            </div>
+                            <div className="p-6 pt-0">
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="flex gap-2">
                                         <Button
                                             type="button"
-                                            variant={type === "spam" ? "default" : "outline"}
+                                            variant={type === "spam" ? "solid" : "outline"}
                                             onClick={() => setType("spam")}
-                                            className={type === "spam" ? "bg-destructive hover:bg-destructive/90" : "border-destructive/50 text-destructive hover:bg-destructive/10"}
+                                            className={type === "spam" ? "bg-red-600 hover:bg-red-700 text-white" : "border-red-500/50 text-red-500 hover:bg-red-500/10"}
                                         >
                                             Report Spam
                                         </Button>
                                         <Button
                                             type="button"
-                                            variant={type === "allow" ? "default" : "outline"}
+                                            variant={type === "allow" ? "solid" : "outline"}
                                             onClick={() => setType("allow")}
                                             className={type === "allow" ? "bg-primary hover:bg-primary/90" : "border-primary/50 text-primary hover:bg-primary/10"}
                                         >
@@ -175,8 +164,8 @@ export function SuggestEmails() {
                                         Submit Suggestion
                                     </Button>
                                 </form>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
 
                     {/* Community Suggestions */}
@@ -186,14 +175,14 @@ export function SuggestEmails() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
                     >
-                        <Card className="bg-card/50 border-primary/20">
-                            <CardHeader>
-                                <CardTitle className="text-2xl">Community Suggestions</CardTitle>
+                        <div className="bg-card/50 border border-primary/20 rounded-xl">
+                            <div className="p-6">
+                                <h3 className="text-2xl font-bold mb-1">Community Suggestions</h3>
                                 <p className="text-muted-foreground">
                                     {isLoggedIn ? "Vote on suggestions to help improve our lists" : "Log in to vote on suggestions"}
                                 </p>
-                            </CardHeader>
-                            <CardContent>
+                            </div>
+                            <div className="p-6 pt-0">
                                 <div className="space-y-4">
                                     {suggestions.map((suggestion) => (
                                         <div key={suggestion.id} className="p-4 border border-border rounded-lg">
@@ -204,8 +193,9 @@ export function SuggestEmails() {
                                                             {suggestion.email || suggestion.domain}
                                                         </code>
                                                         <Badge
-                                                            variant={suggestion.type === "spam" ? "destructive" : "default"}
-                                                            className={suggestion.type === "spam" ? "bg-destructive/20 text-destructive" : "bg-primary/20 text-primary"}
+                                                            color={suggestion.type === "spam" ? "danger" : "primary"}
+                                                            variant="flat"
+                                                            className={suggestion.type === "spam" ? "bg-red-500/20 text-red-600" : "bg-primary/20 text-primary"}
                                                         >
                                                             {suggestion.type === "spam" ? "Spam" : "Allow"}
                                                         </Badge>
@@ -268,30 +258,31 @@ export function SuggestEmails() {
                                         </Button>
                                     </div>
                                 )}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
 
                 {/* Success Popup */}
-                <Dialog open={showPopup} onOpenChange={setShowPopup}>
-                    <DialogContent className="bg-card border-primary/20">
-                        <DialogHeader>
-                            <DialogTitle className="text-primary">Suggestion Submitted!</DialogTitle>
-                            <DialogDescription className="text-muted-foreground">
+                {/* Success Popup */}
+                <Modal isOpen={showPopup} onClose={() => setShowPopup(false)}>
+                    <div className="bg-card border border-primary/20 p-6 rounded-xl max-w-md mx-auto">
+                        <div className="mb-6">
+                            <h3 className="text-xl font-bold text-primary mb-2">Suggestion Submitted!</h3>
+                            <p className="text-muted-foreground">
                                 Thank you for your suggestion. We will review the {type === "spam" ? "domain/email" : "domain"} and
                                 {type === "spam" ? " add it to our spam list" : " consider it for our allow list"} if it meets our criteria.
                                 <br /><br />
                                 Our team manually verifies all suggestions before adding them to ensure accuracy.
-                            </DialogDescription>
-                        </DialogHeader>
+                            </p>
+                        </div>
                         <div className="flex justify-end">
                             <Button onClick={() => setShowPopup(false)} className="bg-primary hover:bg-primary/90 text-primary-foreground">
                                 Got it
                             </Button>
                         </div>
-                    </DialogContent>
-                </Dialog>
+                    </div>
+                </Modal>
             </div>
         </section>
     );

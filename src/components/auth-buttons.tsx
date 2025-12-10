@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser, useStackApp } from "@stackframe/stack";
-import { Button } from "@/components/ui/button";
+import { Button } from "rizzui";
 import { LogIn, LogOut, UserPlus } from "lucide-react";
 import Image from "next/image";
 
@@ -63,7 +63,7 @@ export function AuthButtons() {
 
 export function SignInButton() {
   const app = useStackApp();
-  
+
   return (
     <Button
       onClick={() => app.redirectToSignIn()}
@@ -77,7 +77,7 @@ export function SignInButton() {
 
 export function SignUpButton() {
   const app = useStackApp();
-  
+
   return (
     <Button
       onClick={() => app.redirectToSignUp()}

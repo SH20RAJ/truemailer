@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "rizzui";
 
 export function Hero() {
   return (
@@ -12,13 +12,11 @@ export function Hero() {
           A lightweight and fast <span className="font-semibold text-foreground">email validation API</span> built to help developers check whether an email address is valid, disposable, role-based, or spammy.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Button size="lg" asChild>
-            <Link href="#api-usage">Get Started</Link>
+          <Button size="lg" as={Link} href="#api-usage">
+            Get Started
           </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="https://github.com/sh20raj/trumailer" target="_blank">
-              View on GitHub
-            </Link>
+          <Button size="lg" variant="outline" as={Link} href="https://github.com/sh20raj/trumailer" target="_blank">
+            View on GitHub
           </Button>
         </div>
       </div>
