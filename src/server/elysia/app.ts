@@ -13,7 +13,17 @@ export const app = new Elysia({ prefix: "/api" })
                 title: "TrueMailer API",
                 version: "1.0.0",
                 description: "High-performance Email Validation API"
-            }
+            },
+            servers: [
+                {
+                    url: "https://truemailer.strivio.world",
+                    description: "Production Server"
+                },
+                {
+                    url: "http://localhost:3000",
+                    description: "Local Development"
+                }
+            ]
         }
     }))
     .use(keysRoutes)

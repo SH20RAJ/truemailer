@@ -72,7 +72,7 @@ export default function DocsPage() {
 
                         <div className="bg-muted/50 rounded-lg p-6 border border-border mb-8 overflow-x-auto">
                             <code className="text-sm font-mono text-blue-400">
-                                curl -X GET "https://api.truemailer.com/v1/validate?email=test@example.com" \<br />
+                                curl -X GET "https://truemailer.strivio.world/v1/validate?email=test@example.com" \<br />
                                 &nbsp;&nbsp;-H "Authorization: Bearer YOUR_API_KEY"
                             </code>
                         </div>

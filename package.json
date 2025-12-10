@@ -38,6 +38,7 @@
 				"@stackframe/stack": "^2.8.36",
 				"clsx": "^2.1.1",
 				"date-fns": "^4.1.0",
+				"dns": "^0.2.2",
 				"dotenv": "^17.2.2",
 				"drizzle-orm": "^0.44.5",
 				"elysia": "^1.4.18",

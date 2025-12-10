@@ -59,8 +59,16 @@ export class ValidationService {
     }
 
     private async checkMXRecord(domain: string): Promise<boolean> {
-        // Placeholder: Implement actual DNS lookup here
-        return true;
+        try {
+            const { resolveMx } = await import('dns/promises');
+            const addresses = await resolveMx(domain);
+            return addresses && addresses.length > 0;
+        } catch (error) {
+            // If DNS lookup fails (ENOTFOUND, ENODATA, etc.), allow fallback or return false?
+            // Usually if no MX, it's invalid.
+            // console.error(`MX Check failed for ${domain}:`, error);
+            return false;
+        }
     }
 
     public async validateEmail(email: string, userId?: string) {

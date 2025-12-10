@@ -44,6 +44,14 @@ export function KeysTable() {
 
     return (
         <div className="border border-border rounded-lg overflow-hidden">
+            <div className="bg-yellow-50/50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 mb-4 text-xs text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <EyeOff className="w-4 h-4 shrink-0" />
+                <span>
+                    <strong>Security Note:</strong> The keys shown below are hashed prefixes for identification.
+                    The full secret key is only shown once upon creation.
+                </span>
+            </div>
+
             <table className="w-full text-sm text-left">
                 <thead className="bg-muted/50 text-muted-foreground font-medium border-b border-border">
                     <tr>

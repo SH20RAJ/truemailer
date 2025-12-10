@@ -42,11 +42,12 @@ export const validateRoutes = new Elysia({ prefix: "/v1" })
         const result = await validator.validateEmail(email, userId);
 
         // Async log analytics (don't await)
-        if (userId) {
+        // Async log analytics (don't await)
+        if (apiKeyId) {
             const analytics = new AnalyticsService();
             analytics.logApiUsage({
-                apiKeyId: apiKeyId || 'session', // Use 'session' if logged in via UI
-                userId,
+                apiKeyId: apiKeyId,
+                userId: userId || 'anonymous', // Should technically always be present if apiKeyId is present
                 endpoint: '/v1/validate',
                 method: 'GET',
                 statusCode: 200, // Assuming success

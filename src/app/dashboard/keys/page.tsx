@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { KeysTable } from "@/components/dashboard/keys/keys-table";
 import { CreateKeyForm } from "@/components/dashboard/keys/create-key-form";
+import { ApiPlayground } from "@/components/dashboard/keys/api-playground";
 
 export const metadata: Metadata = {
     title: "API Keys - TrueMailer",
@@ -16,7 +17,15 @@ export default function ApiKeysPage() {
             </div>
 
             <CreateKeyForm />
-            <KeysTable />
+
+            <div className="space-y-4">
+                <h2 className="text-lg font-semibold tracking-tight">Your Keys</h2>
+                <KeysTable />
+            </div>
+
+            <div className="pt-8 border-t border-border">
+                <ApiPlayground />
+            </div>
         </div>
     );
 }
