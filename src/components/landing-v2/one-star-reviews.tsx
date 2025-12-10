@@ -1,7 +1,9 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { Star } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Review {
     id: number;
@@ -83,101 +85,129 @@ const reviews: Review[] = [
     },
 ];
 
-export function OneStarReviews() {
+export function OneStarReviews({ className }: { className?: string }) {
     return (
-        <section className="py-24 bg-red-50 dark:bg-red-950/20 overflow-hidden">
+        <section className={cn("py-24 overflow-hidden bg-background", className)}>
             <div className="container px-4 md:px-6 mb-12">
                 <div className="flex flex-col items-center text-center space-y-4">
-                    <div className="inline-flex items-center rounded-full border border-red-200 bg-red-100 px-3 py-1 text-sm font-medium text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
-                        ⚠️ Warning: Highly Effective
+                    <div className="inline-flex items-center rounded-full border border-primary/10 bg-primary/5 px-3 py-1 text-sm font-medium text-primary">
+                        <span className="flex h-2 w-2 rounded-full bg-primary mr-2" />
+                        Unanimous Feedback
                     </div>
-                    <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-red-900 dark:text-red-100">
+                    <h2 className="text-3xl font-bold tracking-tighter md:text-5xl">
                         1-Star Reviews
                     </h2>
-                    <p className="max-w-[700px] text-red-700/80 dark:text-red-300/70 md:text-xl">
+                    <p className="max-w-[700px] text-muted-foreground md:text-xl">
                         See what actual users are complaining about.
                     </p>
                 </div>
             </div>
 
-            <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
-                <Marquee direction="left" speed={40}>
-                    {reviews.map((review) => (
-                        <ReviewCard key={review.id} review={review} />
+            <div className="relative flex h-[500px] w-full flex-col p-6 overflow-hidden rounded-lg bg-background md:shadow-none">
+                <AnimatedList>
+                    {reviews.map((item) => (
+                        <ReviewCard key={item.id} review={item} />
                     ))}
-                </Marquee>
-
-                <div className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-red-50 dark:from-black to-transparent"></div>
-                <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-red-50 dark:from-black to-transparent"></div>
+                </AnimatedList>
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-background"></div>
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-1/4 bg-gradient-to-b from-background"></div>
             </div>
         </section>
     );
 }
 
-function Marquee({
-    children,
-    direction = "left",
-    speed = 50,
-}: {
-    children: React.ReactNode;
-    direction?: "left" | "right";
-    speed?: number;
-}) {
+const ReviewCard = ({ review }: { review: Review }) => {
     return (
-        <div className="flex w-full overflow-hidden whitespace-nowrap mask-image-linear-to-r">
-            <motion.div
-                className="flex min-w-full shrink-0 items-stretch gap-4 px-2"
-                animate={{
-                    x: direction === "left" ? ["0%", "-100%"] : ["-100%", "0%"],
-                }}
-                transition={{
-                    repeat: Infinity,
-                    ease: "linear",
-                    duration: 1000 / speed,
-                }}
-            >
-                {children}
-            </motion.div>
-            <motion.div
-                className="flex min-w-full shrink-0 items-stretch gap-4 px-2"
-                animate={{
-                    x: direction === "left" ? ["0%", "-100%"] : ["-100%", "0%"],
-                }}
-                transition={{
-                    repeat: Infinity,
-                    ease: "linear",
-                    duration: 1000 / speed,
-                }}
-            >
-                {children}
-            </motion.div>
-        </div>
-    );
-}
-
-function ReviewCard({ review }: { review: Review }) {
-    return (
-        <div className="relative h-full w-[350px] md:w-[400px] flex-none rounded-xl border border-red-200 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-red-900 dark:bg-red-950/40">
-            <div className="flex flex-col gap-4">
-                <div className="flex items-center gap-1">
-                    <Star className="h-5 w-5 fill-red-500 text-red-500" />
-                    <Star className="h-5 w-5 fill-gray-200 text-gray-200 dark:fill-gray-800 dark:text-gray-800" />
-                    <Star className="h-5 w-5 fill-gray-200 text-gray-200 dark:fill-gray-800 dark:text-gray-800" />
-                    <Star className="h-5 w-5 fill-gray-200 text-gray-200 dark:fill-gray-800 dark:text-gray-800" />
-                    <Star className="h-5 w-5 fill-gray-200 text-gray-200 dark:fill-gray-800 dark:text-gray-800" />
+        <figure
+            className={cn(
+                "relative mx-auto min-h-fit w-full max-w-[500px] cursor-pointer overflow-hidden rounded-2xl p-4",
+                "transition-all duration-200 ease-in-out hover:scale-[1.03]",
+                "bg-white [box-shadow:0_0_0_1px_rgba(0,0,0,.03),0_2px_4px_rgba(0,0,0,.05),0_12px_24px_rgba(0,0,0,.05)]",
+                "transform-gpu dark:bg-transparent dark:backdrop-blur-md dark:[border:1px_solid_rgba(255,255,255,.1)] dark:[box-shadow:0_-20px_80px_-20px_#ffffff1f_inset]",
+            )}
+        >
+            <div className="flex flex-row items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-800">
+                    <span className="text-lg">😠</span>
                 </div>
-                <p className="text-base leading-relaxed text-gray-700 dark:text-gray-300 font-medium whitespace-normal">
-                    &ldquo;{review.content}&rdquo;
-                </p>
-                <div className="mt-auto">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {review.author}
-                    </p>
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                        {review.role}
-                    </p>
+                <div className="flex flex-col overflow-hidden">
+                    <figcaption className="flex flex-row items-center whitespace-pre text-lg font-medium dark:text-white ">
+                        <span className="text-sm sm:text-lg">{review.author}</span>
+                        <span className="mx-1">·</span>
+                        <span className="text-xs text-gray-500">{review.role}</span>
+                    </figcaption>
+                    <div className="flex items-center gap-1">
+                        <Star className="h-3 w-3 fill-primary text-primary" />
+                        <Star className="h-3 w-3 fill-muted text-muted" />
+                        <Star className="h-3 w-3 fill-muted text-muted" />
+                        <Star className="h-3 w-3 fill-muted text-muted" />
+                        <Star className="h-3 w-3 fill-muted text-muted" />
+                        <span className="ml-1 text-xs text-muted-foreground">1/5</span>
+                    </div>
                 </div>
             </div>
-        </div>
+            <blockquote className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                {review.content}
+            </blockquote>
+        </figure>
+    );
+};
+
+// Animated List Implementation
+export const AnimatedList = React.memo(
+    ({
+        className,
+        children,
+        delay = 2000, // Speed control
+    }: {
+        className?: string;
+        children: React.ReactNode;
+        delay?: number;
+    }) => {
+        const [index, setIndex] = useState(0);
+        const childrenArray = React.Children.toArray(children);
+
+        useEffect(() => {
+            const interval = setInterval(() => {
+                setIndex((prevIndex) => (prevIndex + 1) % childrenArray.length);
+            }, delay);
+
+            return () => clearInterval(interval);
+        }, [childrenArray.length, delay]);
+
+        const itemsToShow = useMemo(() => {
+            const result = childrenArray.slice(0, index + 1).reverse();
+            return result;
+        }, [index, childrenArray]);
+
+        return (
+            <div className={cn("flex flex-col items-center gap-4", className)}>
+                <AnimatePresence>
+                    {itemsToShow.map((item) => (
+                        <AnimatedListItem key={(item as React.ReactElement).key}>
+                            {item}
+                        </AnimatedListItem>
+                    ))}
+                </AnimatePresence>
+            </div>
+        );
+    },
+);
+
+AnimatedList.displayName = "AnimatedList";
+import React from "react";
+
+export function AnimatedListItem({ children }: { children: React.ReactNode }) {
+    const animations = {
+        initial: { scale: 0, opacity: 0 },
+        animate: { scale: 1, opacity: 1, originY: 0 },
+        exit: { scale: 0, opacity: 0 },
+        transition: { type: "spring", stiffness: 350, damping: 40 },
+    };
+
+    return (
+        <motion.div {...animations} layout className="mx-auto w-full">
+            {children}
+        </motion.div>
     );
 }
