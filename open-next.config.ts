@@ -13,4 +13,9 @@ config.default.install = {
   packages: ["@libsql/client", "@libsql/isomorphic-ws"],
 };
 
+config.default.override = {
+  ...config.default.override,
+  wrapper: "cloudflare-node",
+};
+
 export default config;

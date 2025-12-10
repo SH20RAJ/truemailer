@@ -11,6 +11,9 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"limits": {
+		"cpu_ms": 50000
+	},
 	"assets": {
 		"binding": "ASSETS",
 		"directory": ".open-next/assets"

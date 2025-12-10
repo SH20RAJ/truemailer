@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  // Use standalone output for better Cloudflare compatibility
+  output: 'standalone',
 };
 
 export default nextConfig;
