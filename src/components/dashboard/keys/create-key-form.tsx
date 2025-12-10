@@ -104,7 +104,7 @@ export function CreateKeyForm() {
                             placeholder="e.g. Production Server"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="w-full bg-background"
+                            className="w-full bg-background px-4 py-2"
                             disabled={loading}
                         />
                     </div>

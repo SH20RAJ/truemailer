@@ -13,6 +13,7 @@ import {
     LogOut,
     Menu,
 } from "lucide-react";
+import { UserButton } from "@stackframe/stack";
 import { useState } from "react";
 import { Button } from "rizzui";
 
@@ -110,10 +111,24 @@ export function AppSidebar() {
                             <Settings className="h-4 w-4" />
                             Settings
                         </Link>
-                        <button className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors mt-1">
-                            <LogOut className="h-4 w-4" />
-                            Sign Out
-                        </button>
+                        <div className="flex w-full items-center gap-3 px-3 py-2 mt-1">
+                            <UserButton
+                                extraItems={[
+                                    {
+                                        name: "Sign out",
+                                        type: "item",
+                                        onClick: () => {
+                                            // Stack handles sign out internally, but if we need custom logic:
+                                            // window.location.href = "/handler/sign-out";
+                                        }
+                                    }
+                                ]}
+                            />
+                            <div className="flex flex-col">
+                                <span className="text-sm font-medium">Account</span>
+                                <span className="text-xs text-muted-foreground">Manage profile</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </aside>
