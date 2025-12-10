@@ -54,103 +54,112 @@ export function WhyTrueMailer() {
   ];
 
   return (
-    <section id="why-truemailer" className="py-20">
+    <section id="why-truemailer" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4 text-gradient"
+            className="text-3xl md:text-4xl font-bold mb-6 text-foreground"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            Why Choose TrueMailer?
+            Why Use TrueMailer?
           </motion.h2>
-          <motion.p
-            className="text-lg text-muted-foreground max-w-2xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+
+          <motion.div
+            className="max-w-3xl mx-auto bg-card border border-primary/10 rounded-2xl p-6 md:p-8 mb-12 shadow-sm"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            TrueMailer stands out from the crowd with its unique combination of speed, privacy, and comprehensive validation.
-          </motion.p>
+            <p className="text-xl font-medium text-foreground mb-4">
+              <span className="text-red-500">The Problem:</span> Cold email campaigns fail because of bad data.
+            </p>
+            <p className="text-lg text-muted-foreground">
+              <span className="text-green-500 font-medium">The Solution:</span> TrueMailer catches fake, invalid, and risky emails <span className="text-foreground font-semibold">before</span> you send, protecting your domain and increasing open rates.
+            </p>
+          </motion.div>
         </div>
 
         {/* Benefits Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-          {benefits.map((benefit, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <div className="h-full bg-card/50 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 rounded-xl">
-                <div className="p-6">
-                  <div className="flex items-center mb-2">
-                    {benefit.icon}
-                    <h3 className="ml-2 text-lg font-semibold">{benefit.title}</h3>
-                  </div>
-                </div>
-                <div className="p-6 pt-0">
-                  <p className="text-muted-foreground">{benefit.description}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-20">
+          {/* Benefit 1 */}
+          <motion.div
+            className="flex gap-4 p-6 bg-background rounded-xl border border-border/50 hover:border-primary/20 transition-all"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center shrink-0">
+              <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-2">Reduce Bounce Rate</h3>
+              <p className="text-muted-foreground">Keep your bounce rate under 1% by identifying undeliverable addresses instantly.</p>
+            </div>
+          </motion.div>
 
-        {/* Comparison Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="bg-card/50 border border-primary/20 rounded-xl">
-            <div className="p-6">
-              <h3 className="text-2xl text-center font-semibold">TrueMailer vs Other Email Validation APIs</h3>
+          {/* Benefit 2 */}
+          <motion.div
+            className="flex gap-4 p-6 bg-background rounded-xl border border-border/50 hover:border-primary/20 transition-all"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+              <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-            <div className="p-6 pt-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-primary/20">
-                      <th className="text-left py-3">Feature</th>
-                      <th className="text-center py-3">TrueMailer</th>
-                      <th className="text-center py-3">Other APIs</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {comparison.map((item, index) => (
-                      <tr key={index} className="border-b border-primary/10 hover:bg-primary/5">
-                        <td className="py-3">{item.feature}</td>
-                        <td className="text-center py-3">
-                          {item.truemailer === true ? (
-                            <span className="text-green-400">✓</span>
-                          ) : (
-                            item.truemailer
-                          )}
-                        </td>
-                        <td className="text-center py-3">
-                          {item.others === true ? (
-                            <span className="text-green-400">✓</span>
-                          ) : item.others === false ? (
-                            <span className="text-red-400">✗</span>
-                          ) : (
-                            item.others
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <div>
+              <h3 className="text-xl font-bold mb-2">Improve Sender Reputation</h3>
+              <p className="text-muted-foreground">Protect your domain health and avoid landing in spam folders.</p>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          {/* Benefit 3 */}
+          <motion.div
+            className="flex gap-4 p-6 bg-background rounded-xl border border-border/50 hover:border-primary/20 transition-all"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="h-12 w-12 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+              <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-2">Cleaner Cold Email Campaigns</h3>
+              <p className="text-muted-foreground">Stop wasting money sending emails to bots, dead inboxes, and disposable addresses.</p>
+            </div>
+          </motion.div>
+
+          {/* Benefit 4 */}
+          <motion.div
+            className="flex gap-4 p-6 bg-background rounded-xl border border-border/50 hover:border-primary/20 transition-all"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="h-12 w-12 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+              <svg className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-2">Avoid Spam Traps</h3>
+              <p className="text-muted-foreground">Detect risky emails that can blacklist your domain and ruin your deliverability.</p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -14,7 +14,7 @@ export function Footer() {
               <span className="text-xl font-bold text-foreground">TrueMailer</span>
             </div>
             <p className="text-muted-foreground max-w-md leading-relaxed">
-              Professional email validation API that keeps spam out and ensures deliverability. 
+              Professional email validation API that keeps spam out and ensures deliverability.
               Privacy-first with zero data storage.
             </p>
             <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
@@ -30,8 +30,8 @@ export function Footer() {
               <Link href="#features" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Features
               </Link>
-              <Link href="/test-api" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Playground
+              <Link href="#pricing" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Pricing
               </Link>
               <Link href="/dashboard" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Dashboard
@@ -42,21 +42,21 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Community */}
+          {/* Legal & Support */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Community</h3>
+            <h3 className="font-semibold text-foreground mb-4">Support & Legal</h3>
             <div className="space-y-3">
-              <Link href="https://github.com/sh20raj/truemailer" target="_blank" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                GitHub
-              </Link>
               <Link href="https://github.com/sh20raj/truemailer/issues" target="_blank" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Issues
+                Support / Issues
               </Link>
-              <Link href="/help-improve" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Help Improve
+              <Link href="/privacy" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Privacy Policy
               </Link>
-              <Link href="https://github.com/sh20raj/truemailer/blob/main/LICENSE" target="_blank" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
-                License
+              <Link href="/terms" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Terms of Service
+              </Link>
+              <Link href="mailto:contact@strivio.world" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Contact
               </Link>
             </div>
           </div>

@@ -1,5 +1,4 @@
-add personal blocklist and whitelist feature
-
-fix all build errors and tsc -noEmit 
-
 add elysiajs for fast apis
+
+
+scan the codebase then know what we wanna build and how then delete the whole https://truemailer.strivio.world/dashboard and every component first - then completely rething the design and implimentation the backend and the frontend of the app - with the features promised you are free to delete the database if req. and recreate it.... - api key management, analytics, personal list, docs, must be updated and working - think deeper, scale and longer, fast, every feature must be working, you are free to merge/remove/add any component or pages ac to what you think will be best for the app
