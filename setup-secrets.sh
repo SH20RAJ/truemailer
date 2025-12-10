@@ -36,5 +36,7 @@ set_secret_if_exists "NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY"
 set_secret_if_exists "STACK_SECRET_SERVER_KEY"
 set_secret_if_exists "NEXTAUTH_URL"
 set_secret_if_exists "NEXTAUTH_SECRET"
+set_secret_if_exists "TURSO_DATABASE_URL"
+set_secret_if_exists "TURSO_AUTH_TOKEN"
 
 echo "Secret setup completed!"
