@@ -1,12 +1,11 @@
-import type { Metadata } from "next";
-import { DashboardClient } from "@/components/dashboard/dashboard-client";
+import { Metadata } from "next";
+import PlaygroundClient from "@/components/dashboard/playground/playground-client";
 
 export const metadata: Metadata = {
-  title: "Validation Playground",
-  description: "Test email validation with your API key in real time.",
+    title: "Playground - TrueMailer",
+    description: "Test email validation in real-time.",
 };
 
-export default function PlaygroundPage() {
-  return <DashboardClient section="playground" />;
+export default function Page() {
+    return <PlaygroundClient />;
 }
-

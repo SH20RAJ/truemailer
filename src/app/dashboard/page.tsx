@@ -1,30 +1,28 @@
-import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'API Dashboard - Manage Keys & Analytics',
-  description: 'Manage your TrueMailer API keys, monitor usage analytics, test email validation, and access comprehensive API documentation.',
-  keywords: [
-    'API dashboard',
-    'API key management', 
-    'email validation analytics',
-    'API usage monitoring',
-    'email validation playground',
-    'API documentation',
-    'developer tools',
-    'usage statistics'
-  ],
-  openGraph: {
-    title: 'TrueMailer API Dashboard',
-    description: 'Manage your API keys, monitor usage analytics, and test email validation with our comprehensive dashboard.',
-    type: 'website',
-  },
-  robots: {
-    index: false, // Dashboard should not be indexed
-    follow: false,
-  },
+    title: "Dashboard - TrueMailer",
+    description: "View your usage statistics and manage your account.",
 };
 
-export default function Dashboard() {
-  redirect("/dashboard/overview");
+export default function DashboardPage() {
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-bold tracking-tight">Overview</h1>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {/* Placeholder cards */}
+                <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">
+                    <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Total Validations</h3>
+                    <div className="text-2xl font-bold">0</div>
+                </div>
+                <div className="p-6 rounded-xl border bg-card text-card-foreground shadow-sm">
+                    <h3 className="tracking-tight text-sm font-medium text-muted-foreground">Credits Used</h3>
+                    <div className="text-2xl font-bold">0 / 5000</div>
+                </div>
+            </div>
+        </div>
+    );
 }

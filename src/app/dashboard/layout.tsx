@@ -1,21 +1,18 @@
-import TwitterSidebar from "@/components/dashboard/twitter-sidebar"
-import { ReactNode } from "react"
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
 
-export const metadata: { title: string; description: string } = {
-  title: 'Dashboard',
-  description: 'Dashboard layout with sidebar navigation',
-}
-
-export default function DashboardLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="dashboard-theme flex min-h-screen">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-primary focus:text-primary-foreground focus:px-3 focus:py-2 focus:rounded-md z-50">
-        Skip to content
-      </a>
-      <TwitterSidebar />
-      <main id="main-content" className="flex-1 md:ml-64">
-        {children}
-      </main>
-    </div>
-  )
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="min-h-screen bg-background text-foreground">
+            <AppSidebar />
+            <main className="md:pl-64 min-h-screen transition-all duration-300">
+                <div className="container mx-auto p-4 md:p-8 pt-20 md:pt-8 max-w-7xl">
+                    {children}
+                </div>
+            </main>
+        </div>
+    );
 }
