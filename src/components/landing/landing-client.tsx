@@ -8,6 +8,7 @@ import { HowItWorks } from "@/components/landing-v2/how-it-works";
 import { QuickIntegration } from "@/components/landing-v2/quick-integration";
 import { TechStack } from "@/components/landing-v2/tech-stack";
 import { SuggestEmails } from "@/components/landing-v2/suggest-emails";
+import { OneStarReviews } from "@/components/landing-v2/one-star-reviews";
 import { Community } from "@/components/landing-v2/community";
 import { FinalCTA } from "@/components/landing-v2/final-cta";
 import { Footer } from "@/components/landing-v2/footer";
@@ -23,6 +24,7 @@ export function LandingClient() {
       <QuickIntegration />
       <TechStack />
       <SuggestEmails />
+      <OneStarReviews />
       <Community />
       <FinalCTA />
       <Footer />
